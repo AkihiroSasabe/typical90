@@ -1,0 +1,460 @@
+[package]
+name = "typical90"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+proconio = "0.3.6"
+itertools = "0.10.3"
+
+[[bin]]
+name = "001"
+path = "src/001.rs"
+
+
+[[bin]]
+name = "002"
+path = "src/002.rs"
+
+
+[[bin]]
+name = "003"
+path = "src/003.rs"
+
+
+[[bin]]
+name = "004"
+path = "src/004.rs"
+
+
+[[bin]]
+name = "005"
+path = "src/005.rs"
+
+
+[[bin]]
+name = "006"
+path = "src/006.rs"
+
+
+[[bin]]
+name = "007"
+path = "src/007.rs"
+
+
+[[bin]]
+name = "008"
+path = "src/008.rs"
+
+
+[[bin]]
+name = "009"
+path = "src/009.rs"
+
+
+[[bin]]
+name = "010"
+path = "src/010.rs"
+
+
+[[bin]]
+name = "011"
+path = "src/011.rs"
+
+
+[[bin]]
+name = "012"
+path = "src/012.rs"
+
+
+[[bin]]
+name = "013"
+path = "src/013.rs"
+
+
+[[bin]]
+name = "014"
+path = "src/014.rs"
+
+
+[[bin]]
+name = "015"
+path = "src/015.rs"
+
+
+[[bin]]
+name = "016"
+path = "src/016.rs"
+
+
+[[bin]]
+name = "017"
+path = "src/017.rs"
+
+
+[[bin]]
+name = "018"
+path = "src/018.rs"
+
+
+[[bin]]
+name = "019"
+path = "src/019.rs"
+
+
+[[bin]]
+name = "020"
+path = "src/020.rs"
+
+
+[[bin]]
+name = "021"
+path = "src/021.rs"
+
+
+[[bin]]
+name = "022"
+path = "src/022.rs"
+
+
+[[bin]]
+name = "023"
+path = "src/023.rs"
+
+
+[[bin]]
+name = "024"
+path = "src/024.rs"
+
+
+[[bin]]
+name = "025"
+path = "src/025.rs"
+
+
+[[bin]]
+name = "026"
+path = "src/026.rs"
+
+
+[[bin]]
+name = "027"
+path = "src/027.rs"
+
+
+[[bin]]
+name = "028"
+path = "src/028.rs"
+
+
+[[bin]]
+name = "029"
+path = "src/029.rs"
+
+
+[[bin]]
+name = "030"
+path = "src/030.rs"
+
+
+[[bin]]
+name = "031"
+path = "src/031.rs"
+
+
+[[bin]]
+name = "032"
+path = "src/032.rs"
+
+
+[[bin]]
+name = "033"
+path = "src/033.rs"
+
+
+[[bin]]
+name = "034"
+path = "src/034.rs"
+
+
+[[bin]]
+name = "035"
+path = "src/035.rs"
+
+
+[[bin]]
+name = "036"
+path = "src/036.rs"
+
+
+[[bin]]
+name = "037"
+path = "src/037.rs"
+
+
+[[bin]]
+name = "038"
+path = "src/038.rs"
+
+
+[[bin]]
+name = "039"
+path = "src/039.rs"
+
+
+[[bin]]
+name = "040"
+path = "src/040.rs"
+
+
+[[bin]]
+name = "041"
+path = "src/041.rs"
+
+
+[[bin]]
+name = "042"
+path = "src/042.rs"
+
+
+[[bin]]
+name = "043"
+path = "src/043.rs"
+
+
+[[bin]]
+name = "044"
+path = "src/044.rs"
+
+
+[[bin]]
+name = "045"
+path = "src/045.rs"
+
+
+[[bin]]
+name = "046"
+path = "src/046.rs"
+
+
+[[bin]]
+name = "047"
+path = "src/047.rs"
+
+
+[[bin]]
+name = "048"
+path = "src/048.rs"
+
+
+[[bin]]
+name = "049"
+path = "src/049.rs"
+
+
+[[bin]]
+name = "050"
+path = "src/050.rs"
+
+
+[[bin]]
+name = "051"
+path = "src/051.rs"
+
+
+[[bin]]
+name = "052"
+path = "src/052.rs"
+
+
+[[bin]]
+name = "053"
+path = "src/053.rs"
+
+
+[[bin]]
+name = "054"
+path = "src/054.rs"
+
+
+[[bin]]
+name = "055"
+path = "src/055.rs"
+
+
+[[bin]]
+name = "056"
+path = "src/056.rs"
+
+
+[[bin]]
+name = "057"
+path = "src/057.rs"
+
+
+[[bin]]
+name = "058"
+path = "src/058.rs"
+
+
+[[bin]]
+name = "059"
+path = "src/059.rs"
+
+
+[[bin]]
+name = "060"
+path = "src/060.rs"
+
+
+[[bin]]
+name = "061"
+path = "src/061.rs"
+
+
+[[bin]]
+name = "062"
+path = "src/062.rs"
+
+
+[[bin]]
+name = "063"
+path = "src/063.rs"
+
+
+[[bin]]
+name = "064"
+path = "src/064.rs"
+
+
+[[bin]]
+name = "065"
+path = "src/065.rs"
+
+
+[[bin]]
+name = "066"
+path = "src/066.rs"
+
+
+[[bin]]
+name = "067"
+path = "src/067.rs"
+
+
+[[bin]]
+name = "068"
+path = "src/068.rs"
+
+
+[[bin]]
+name = "069"
+path = "src/069.rs"
+
+
+[[bin]]
+name = "070"
+path = "src/070.rs"
+
+
+[[bin]]
+name = "071"
+path = "src/071.rs"
+
+
+[[bin]]
+name = "072"
+path = "src/072.rs"
+
+
+[[bin]]
+name = "073"
+path = "src/073.rs"
+
+
+[[bin]]
+name = "074"
+path = "src/074.rs"
+
+
+[[bin]]
+name = "075"
+path = "src/075.rs"
+
+
+[[bin]]
+name = "076"
+path = "src/076.rs"
+
+
+[[bin]]
+name = "077"
+path = "src/077.rs"
+
+
+[[bin]]
+name = "078"
+path = "src/078.rs"
+
+
+[[bin]]
+name = "079"
+path = "src/079.rs"
+
+
+[[bin]]
+name = "080"
+path = "src/080.rs"
+
+
+[[bin]]
+name = "081"
+path = "src/081.rs"
+
+
+[[bin]]
+name = "082"
+path = "src/082.rs"
+
+
+[[bin]]
+name = "083"
+path = "src/083.rs"
+
+
+[[bin]]
+name = "084"
+path = "src/084.rs"
+
+
+[[bin]]
+name = "085"
+path = "src/085.rs"
+
+
+[[bin]]
+name = "086"
+path = "src/086.rs"
+
+
+[[bin]]
+name = "087"
+path = "src/087.rs"
+
+
+[[bin]]
+name = "088"
+path = "src/088.rs"
+
+
+[[bin]]
+name = "089"
+path = "src/089.rs"
+
+
+[[bin]]
+name = "090"
+path = "src/090.rs"
+
