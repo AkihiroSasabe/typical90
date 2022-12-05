@@ -74,13 +74,14 @@ fn iterative_square_method(mut a: usize, mut x: usize, MODULO: usize) -> usize {
     //        = (9^2)^(3/2) * 9^(3%2) * 3^1
     //        = 81^1 * 9^1 * 3^1
 
+    a %= MODULO;
     let mut answer = 1;
     while x >= 1 {
         if x % 2 == 1 {
             answer = (answer * a) % MODULO;
         }
         x = x / 2;
-        a = (a * a) % MODULO;
+        a = a * a % MODULO;
     }
 
     return answer;
