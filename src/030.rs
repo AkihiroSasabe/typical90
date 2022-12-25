@@ -46,25 +46,20 @@ fn main() {
 
 // エラトステネスの篩(ふるい)
 // n以下の素数を全て列挙する為のアルゴリズムO(n*log(log(n)))
-fn sieve_oferatosthenes(n: usize) -> Vec<usize> {
-    // let mut root_n = 1;
-    // while root_n * root_n <= n {
-    //     root_n += 1;
-    // }
-    // let mut sosu_list = vec![1; root_n + 1];
-    let mut sosu_list = vec![1; n + 1];
-    sosu_list[0] = 0;
-    sosu_list[1] = 0;
+fn sieve_of_eratosthenes(n: usize) -> Vec<usize> {
+    // prime_judge[i] := iが素数なら1, そうでなければ0
+    let mut prime_judge = vec![1; n + 1];
+    prime_judge[0] = 0;
+    prime_judge[1] = 0;
 
-    let mut sosu = 2;
-    
+    // prime_list := n以下の素数を格納したリスト
+    let mut prime_list = vec![];
     for i in 2..(n+1) {
-        if sosu_list[i] == 0 {continue}
-        if n % i == 0 {
-            for j in 2..(n/i) {
-                sosu_list[j * i] = 0;
-            }
+        if prime_judge[i] == 0 {continue}
+        for j in 2..((n/i)+1) {
+            prime_judge[j * i] = 0;
         }
+        prime_list.push(i);
     }
-    return sosu_list;
+    return prime_list;
 }
