@@ -20,21 +20,18 @@ fn main() {
 
 }
 
-// ユークリッドの互除法で最小公倍数を求める
-// ユークリッドの互除法とは、x < y のとき、gcd(x, y)=gcd(x, y%x)
+// ユークリッドの互除法で最大公約数を求める (Euclidean Algorithm)
+// ユークリッドの互除法とは、x < y のとき、gcd(x, y)=gcd(x, y % x)
 fn gcd(mut x: usize, mut y:usize) -> usize {
     if y <= x {
-        let y_pre = y.clone();
-        y = x.clone();
-        x = y_pre;
+        let y_before = y;
+        y = x;
+        x = y_before;
     } 
-    let amari = y % x;
-    if amari == 0 {
+    if y % x == 0 {
         return x
     }
     else {
-        y = y % x;
-        return gcd(x, y);
+        return gcd(x, y % x);
     }
-
 }
