@@ -57,8 +57,9 @@ fn main() {
     }
 }
 
-// ワーシャルフロイド法で、全頂点対間の距離をO(V^3)で最小化 (全点対間最短経路問題)
-fn floyd_warshall(x: usize, n: usize, a: &Vec<Vec<isize>>) -> Vec<Vec<usize>> {
+// フロイド・ワーシャル法で、全頂点対間の距離をO(V^3)で最小化 (全点対間最短経路問題)
+// この問題を解く用にアレンジされているのでabc257_Dを参考: https://github.com/AkihiroSasabe/atcoder/blob/main/src/abc257/d.rs: 
+fn floyd_warshall(x: usize, n: usize, graph: &Vec<Vec<isize>>) -> Vec<Vec<usize>> {
     // dp[i][j]で頂点iから頂点jに行くときの最短距離
     let mut dp = vec![vec![0; n]; n];
 
@@ -68,8 +69,8 @@ fn floyd_warshall(x: usize, n: usize, a: &Vec<Vec<isize>>) -> Vec<Vec<usize>> {
             if i == j {
                 dp[i][j] = 0;
             }
-            else if a[i][j] != -1 {
-                dp[i][j] = a[i][j] as usize;
+            else if graph[i][j] != -1 {
+                dp[i][j] = graph[i][j] as usize;
             }
             else {
                 dp[i][j] = x;
@@ -98,7 +99,7 @@ fn meguru_binary_search(mut ok: usize, mut ng: usize, n: usize, p: usize, k: usi
         let mid = (ok + ng) / 2;
         // println!("ng: {}, mid: {}, ok: {}, k:{}", ng, mid, ok, k);
 
-        // ワーシャルフロイド法で、全頂点対間の距離を最小化
+        // フロイド・ワーシャル法で、全頂点対間の距離を最小化
         let dp = floyd_warshall(mid, n, a);
     
         // for i in 0..n {
