@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 proconio = "0.3.6"
 itertools = "0.10.3"
+superslice = "1.0.0"
 
 [[bin]]
 name = "001"
