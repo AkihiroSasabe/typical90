@@ -68,6 +68,8 @@ fn main() {
     let mut complementary_event_3 = 0;
     // BITの各ノードには、円周上の各座標における端点Lの個数が格納される
     let mut bit: BinaryIndexedTree<usize> = BinaryIndexedTree::new(n);
+        // index: 円周上の座標
+        // node: index上にある端点Lの個数
     for i in 0..m {
         // r1は、今までのイテレーションの中で最大のRの座標
         let r1 = position_rl[i][0];
@@ -127,7 +129,7 @@ impl<T: Default + Copy + std::ops::AddAssign + std::fmt::Debug> BinaryIndexedTre
 
             // Rustでは、負の数は2の補数表現で保持される。
             // 補数の定義: N進法において自然数xを表現するのに必要な最小の桁数をnとしたとき
-            // xのNの補数はN^n - a となる
+            // xのNの補数はN^n - x となる
             // 例： 5(10進数)=101(2進数)の2の補数は、2^3-5(10進法) = 1000 - 101 (2進法) = 011(2進法)となる
             // 参考1: http://www.cc.kyoto-su.ac.jp/~kbys/kiso/number/negative.html
             // 参考2: http://www.f.waseda.jp/takezawa/math/joho/hosuu.pdf
