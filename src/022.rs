@@ -22,16 +22,12 @@ fn main() {
 
 // ユークリッドの互除法で最大公約数を求める (Euclidean Algorithm)
 // ユークリッドの互除法とは、x < y のとき、gcd(x, y)=gcd(x, y % x)
-fn gcd(mut x: usize, mut y:usize) -> usize {
-    if y <= x {
-        let y_before = y;
-        y = x;
-        x = y_before;
-    } 
-    if y % x == 0 {
-        return x
+fn gcd(x: usize, y:usize) -> usize {
+    if y == 0 {
+        // 任意の整数xは0の約数と言える(∵0 % x == 0)ので、0とxの最大公約数はx
+        return x;
     }
     else {
-        return gcd(x, y % x);
+        return gcd(y, x % y);
     }
 }
