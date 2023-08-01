@@ -9,6 +9,7 @@ edition = "2021"
 proconio = "0.3.6"
 itertools = "0.10.3"
 superslice = "1.0.0"
+num = "0.4"
 
 [[bin]]
 name = "001"
