@@ -181,7 +181,8 @@ impl SegmentTree {
         let tree_size = leaf_size * 2 - 1;
 
         // 1 << 60 = 1,152,921,504,606,846,976 = 1.152 * 10^18
-        let NEGATIVE_INF = (1 << 60) * (-1);
+        // let NEGATIVE_INF = (1 << 60) * (-1);
+        let NEGATIVE_INF = std::isize::MIN;
         let tree = vec![NEGATIVE_INF; tree_size];
         return SegmentTree {list_size, tree_size, leaf_size, tree}
     }
