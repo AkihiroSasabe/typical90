@@ -86,18 +86,16 @@ fn main() {
     // let mut bit: BinaryIndexedTree<usize> = BinaryIndexedTree::new(7);
     // println!("------------");
     // bit.add(4, 3);
-    // bit.sum(6);
-
-    
+    // bit.sum(6);    
 }
 
 
-// Binary Indexed Tree (BIT)
-// 参考: https://algo-logic.info/binary-indexed-tree/
-// 構築: O(N)
-// 加算: O(logN): 数列Anのi番目の項にxを足す (区間加算じゃないので注意)
-// 区間和: O(logN): 数列Anの先頭からi番目までの項の和を求める
-// セグメント木より機能が限定的だが、実装が簡単 & 定数倍で高速 & 省メモリ
+/// Binary Indexed Tree (BIT)
+/// 参考: https://algo-logic.info/binary-indexed-tree/
+/// (1)構築: O(N)
+/// (2)加算: O(logN): 数列Anのi番目の項にxを足す (区間加算じゃないので注意)
+/// (3)区間和: O(logN): 数列Anの先頭からi番目までの項の和を求める (閉区間だからiも含めるので注意)
+/// セグメント木より機能が限定的だが、実装が簡単 & 定数倍で高速 & 省メモリ
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct BinaryIndexedTree<T> {
     n: isize,       // 配列の要素数(数列の要素数+1)
@@ -107,7 +105,7 @@ struct BinaryIndexedTree<T> {
     // これは後で計算をする際に楽になるため。
 }
 
-impl<T: Default + Copy + std::ops::AddAssign + std::fmt::Debug> BinaryIndexedTree<T> {
+impl<T: Default + Copy + std::ops::AddAssign + std::ops::SubAssign + std::fmt::Debug> BinaryIndexedTree<T> {
     fn new(n: usize) -> Self {
         BinaryIndexedTree {
             n: (n + 1) as isize,
@@ -151,6 +149,16 @@ impl<T: Default + Copy + std::ops::AddAssign + std::fmt::Debug> BinaryIndexedTre
             // 1111111111
             // 1111111111
             // 1111 となる (1が64個)。
+        }
+    }
+
+    // Tが非負整数型(usizeなど)のときに、除算を行う
+    fn subtract(&mut self, index: usize, x: T) {
+        let mut i = (index + 1) as isize;
+        // let mut i = index as isize; // こっちを採用すると、インターフェースも半開区間にできる
+        while i < self.n {
+            self.bit[i as usize]  -= x;
+            i += (i & - i); // iにi の最後の1のビットを足すと、親のインデックスに移れる
         }
     }
 
