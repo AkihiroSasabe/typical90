@@ -178,5 +178,14 @@ impl<T: Default + Copy + std::ops::AddAssign + std::ops::SubAssign + std::fmt::D
         }
         return sum
     }
+    fn print_all_cum(&self) {
+        // デバッグ用に、各インデックスにおける、累積和を標準出力に print
+        print!("bit = ");
+        for i in 0..self.n-1 {
+            let sum_i = self.sum(i as usize);
+            print!("{:?} ", sum_i);
+        }
+        println!("");
+    }
 }
 
