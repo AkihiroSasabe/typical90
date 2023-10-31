@@ -105,7 +105,7 @@ struct BinaryIndexedTree<T> {
     // これは後で計算をする際に楽になるため。
 }
 
-impl<T: Default + Copy + std::ops::AddAssign + std::ops::SubAssign + std::fmt::Debug> BinaryIndexedTree<T> {
+impl<T: Default + Copy + std::ops::AddAssign + std::ops::SubAssign + std::fmt::Debug + std::ops::Sub<Output = T>> BinaryIndexedTree<T> {
     fn new(n: usize) -> Self {
         BinaryIndexedTree {
             n: (n + 1) as isize,
@@ -177,6 +177,24 @@ impl<T: Default + Copy + std::ops::AddAssign + std::ops::SubAssign + std::fmt::D
             // println!("==== ==== ==== ====");
         }
         return sum
+    }
+    // 閉区間[left, right]を取得する
+    fn sum_range(&self, left: usize, right: usize) -> T {
+        let right_sum: T = self.sum(right);
+        let left_sum: T = match left == 0 {
+            true => Default::default(), // 0のこと
+            false => self.sum(left-1)
+        };
+        let range_sum: T = right_sum - left_sum;
+        return range_sum
+    }
+    // index番目の値を取得する (sum()は累積和を取得するメソッド)
+    fn get_element(&self, index: usize) -> T {
+        let element = match index == 0 {
+            true => self.sum(index),
+            false => self.sum(index) - self.sum(index - 1)
+        };
+        return element
     }
     fn print_all_cum(&self) {
         // デバッグ用に、各インデックスにおける、累積和を標準出力に print
