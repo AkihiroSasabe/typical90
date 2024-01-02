@@ -69,7 +69,7 @@ fn get_digit_num(mut x: usize) -> usize {
 
 // mod p を法とした時の割り算 a / b の値
 fn mod_dev(a: usize, b: usize, modulo: usize) -> usize {
-    return a * mod_inverse(b, modulo) % modulo
+    return a % modulo * mod_inverse(b, modulo) % modulo
 }
 
 // mod p を法とした時の逆数(逆元という) 1 / b の値
@@ -80,7 +80,7 @@ fn mod_inverse(a: usize, modulo: usize) -> usize {
     // <=> 1 / a = a^(p-2) (mod p)
     // (ただし、法pは素数)
 
-    return mod_pow(a, modulo - 2, modulo)
+    return mod_pow(a % modulo, modulo - 2, modulo)
 }
 
 // mod p を法とした時の累乗
@@ -109,6 +109,7 @@ fn mod_pow(mut base: usize, mut exponent: usize, modulo: usize) -> usize {
     // base = 81 * 81
     // exp = 1 / 2 = 0
 
+    base %= modulo;
     let mut remainder = 1;
     while exponent != 0 {
         if exponent % 2 == 1 {
