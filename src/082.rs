@@ -78,7 +78,8 @@ fn mod_inverse(a: usize, modulo: usize) -> usize {
     //     a^(p-1) = 1     (mod p)
     // <=> a * a^(p-2) = 1 (mod p)
     // <=> 1 / a = a^(p-2) (mod p)
-    // (ただし、法pは素数)
+    // ただし、法pは素数で、aはpの倍数ではない整数。
+    // aがpの倍数だと、a^(p-1)=0 (mod p)となる。
 
     return mod_pow(a % modulo, modulo - 2, modulo)
 }
