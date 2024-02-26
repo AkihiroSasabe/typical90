@@ -9,7 +9,7 @@ fn main() {
     input! {
         mut n: usize,
     }
-    let prime_num_list = prime_factorize(n.clone());
+    let prime_num_list: Vec<[usize; 2]> = prime_factorize(n);
     // println!("{:?}", prime_num_list);
     
     let mut count = 0;
@@ -29,7 +29,13 @@ fn main() {
 
 
 // 素因数分解
-fn prime_factorize(mut x: usize) -> Vec<Vec<usize>> {
+fn prime_factorize(mut x: usize) -> Vec<[usize; 2]> {
+    // prime_num_list[i] := [素数p_i, 指数exp_i] が、格納されたリスト
+    // 
+    // 例: x = 48 = 2^4 * 3^1 のとき、
+    // let prime_num_list: Vec<[usize; 2]> = prime_factorize(48);
+    // prime_num_list = [[2, 4], [3, 1]]
+
     // let root_x = (x as f64).sqrt() as usize;
     let mut prime_num_list = vec![];
     let mut i = 1;
@@ -42,11 +48,11 @@ fn prime_factorize(mut x: usize) -> Vec<Vec<usize>> {
             exponent += 1;
         }
         if exponent != 0 {
-            prime_num_list.push(vec![i, exponent]);
+            prime_num_list.push([i, exponent]);
         }
     }
     if x != 1 {
-        prime_num_list.push(vec![x, 1]);
+        prime_num_list.push([x, 1]);
     }
     return prime_num_list
 }

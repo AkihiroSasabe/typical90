@@ -8,6 +8,10 @@ use proconio::marker::Chars;
 use std::collections::HashMap;
 
 fn main() {
+
+    // 正の整数 K が与えられます。
+    // abc = K を満たす正の整数 (a,b,c) (a≤b≤c) の組がいくつあるかを求めてください。
+    // 1 <= k <= 10^12
     input! {
         k: usize,
     }
@@ -90,7 +94,13 @@ fn saiki(current_depth: usize, keys: &Vec<usize>, values: &Vec<usize>, yakusu: u
 }
 
 // 素因数分解 (No.75の使いまわし)
-fn prime_factorize(mut x: usize) -> Vec<Vec<usize>> {
+fn prime_factorize(mut x: usize) -> Vec<[usize; 2]> {
+    // prime_num_list[i] := [素数p_i, 指数exp_i] が、格納されたリスト
+    // 
+    // 例: x = 48 = 2^4 * 3^1 のとき、
+    // let prime_num_list: Vec<[usize; 2]> = prime_factorize(48);
+    // prime_num_list = [[2, 4], [3, 1]]
+
     // let root_x = (x as f64).sqrt() as usize;
     let mut prime_num_list = vec![];
     let mut i = 1;
@@ -103,11 +113,11 @@ fn prime_factorize(mut x: usize) -> Vec<Vec<usize>> {
             exponent += 1;
         }
         if exponent != 0 {
-            prime_num_list.push(vec![i, exponent]);
+            prime_num_list.push([i, exponent]);
         }
     }
     if x != 1 {
-        prime_num_list.push(vec![x, 1]);
+        prime_num_list.push([x, 1]);
     }
     return prime_num_list
 }
