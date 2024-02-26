@@ -307,15 +307,17 @@ pub mod lazy_segment_tree {
         composition: Composition,   // 合成関数f(g(x)) (親のlazy -> 子のlazy　への伝播に対応)
         id: Id                      // 区間操作演算mappingにおける恒等写像 (遅延配列の初期値に対応)
     }
-    //     // Range Increment Update
-    //     // Range Assignment Update
-    // Add と Replace の方がわかりやすいかも
+        // Update (更新)
+        // - Range Increment Update
+        // - Range Assignment Update
+        //   (Add と Replace の方がわかりやすいかも)
 
-    //     // Range Minimum Query
-    //     // Range Maximum Query
-    //     // Range Sum Query
+        // Query (取得)
+        // - Range Minimum Query
+        // - Range Maximum Query
+        // - Range Sum Query
 
-    // [1] 区間加算更新・区間最小値取得
+    // [1] 区間加算更新・区間最小値取得　の生成
     pub fn new_range_increment_update_and_range_minimum_query(list_size: usize) -> LazySegmentTree<isize, fn(&isize, &isize) -> isize, fn() -> isize, isize, fn(&isize, &isize) -> isize, fn(&isize, &isize) -> isize, fn() -> isize> {
         /// 区間取得演算 (opだけど、更新操作ではなく取得なので注意)
         /// s0: 左の子data (たぶん)
@@ -361,7 +363,7 @@ pub mod lazy_segment_tree {
         return lazy_segment_tree
     }
 
-    /// [1] 区間加算更新・区間最小値取得 を vector から生成
+    // [1] 区間加算更新・区間最小値取得 を vector から生成
     pub fn new_range_increment_update_and_range_minimum_query_from_vec(init_vector: &Vec<isize>) -> LazySegmentTree<isize, fn(&isize, &isize) -> isize, fn() -> isize, isize, fn(&isize, &isize) -> isize, fn(&isize, &isize) -> isize, fn() -> isize> {
         let n = init_vector.len();
         let mut lazy_segment_tree = new_range_increment_update_and_range_minimum_query(n);
@@ -373,7 +375,7 @@ pub mod lazy_segment_tree {
         return lazy_segment_tree
     }
     
-    // [2] 区間加算更新・区間最大値取得
+    // [2] 区間加算更新・区間最大値取得　の生成
     pub fn new_range_increment_update_and_range_maximum_query(list_size: usize) -> LazySegmentTree<isize, fn(&isize, &isize) -> isize, fn() -> isize, isize, fn(&isize, &isize) -> isize, fn(&isize, &isize) -> isize, fn() -> isize> {
         fn op(&s0: &isize, &s1:  &isize) -> isize {
             s0.max(s1)
@@ -438,13 +440,7 @@ pub mod lazy_segment_tree {
         return lazy_segment_tree
     }
 
-    /// 区間和取得用の構造体
-    #[derive(Clone, Debug, Copy)]
-    pub struct SSum {
-        pub value: isize,
-        size: isize
-    }
-    // [3] 区間加算更新・区間和取得
+    // [3] 区間加算更新・区間和取得　の生成
     pub fn new_range_increment_update_and_range_sum_query(list_size: usize) -> LazySegmentTree<SSum, fn(&SSum, &SSum) -> SSum, fn() -> SSum, isize, fn(&isize, &SSum) -> SSum, fn(&isize, &isize) -> isize, fn() -> isize> {
         
         fn op(&s0: &SSum, &s1:  &SSum) -> SSum {
@@ -491,7 +487,7 @@ pub mod lazy_segment_tree {
         return lazy_segment_tree
     }
 
-    // [4] 区間代入更新・区間最小値取得
+    // [4] 区間代入更新・区間最小値取得　の生成
     pub fn new_range_assignment_update_and_range_minimum_query(list_size: usize) -> LazySegmentTree<isize, fn(&isize, &isize) -> isize, fn() -> isize, isize, fn(&isize, &isize) -> isize, fn(&isize, &isize) -> isize, fn() -> isize> {
         /// 区間取得演算 (opだけど、更新操作ではなく取得なので注意)
         /// s0: 左の子data (たぶん)
@@ -555,7 +551,7 @@ pub mod lazy_segment_tree {
         return lazy_segment_tree
     }
 
-    // [5] 区間代入更新・区間最大値取得
+    // [5] 区間代入更新・区間最大値取得　の生成
     pub fn new_range_assignment_update_and_range_maximum_query(list_size: usize) -> LazySegmentTree<isize, fn(&isize, &isize) -> isize, fn() -> isize, isize, fn(&isize, &isize) -> isize, fn(&isize, &isize) -> isize, fn() -> isize> {
         /// 区間取得演算 (opだけど、更新操作ではなく取得なので注意)
         /// s0: 左の子data (たぶん)
@@ -619,7 +615,7 @@ pub mod lazy_segment_tree {
         return lazy_segment_tree
     }
 
-    // [6] 区間代入更新・区間和取得
+    // [6] 区間代入更新・区間和取得　の生成
     pub fn new_range_assignment_update_and_range_sum_query(list_size: usize) -> LazySegmentTree<SSum, fn(&SSum, &SSum) -> SSum, fn() -> SSum, isize, fn(&isize, &SSum) -> SSum, fn(&isize, &isize) -> isize, fn() -> isize> {
         /// 区間取得演算 (opだけど、更新操作ではなく取得なので注意)
         /// s0: 左の子data (たぶん)
@@ -690,9 +686,8 @@ pub mod lazy_segment_tree {
         return lazy_segment_tree
     }
 
+    // 区間和取得用の遅延評価セグメント木の各ノードの、守備範囲の大きさ(tree.size)を適切に初期化する関数
     fn init_node_size_for_range_sum_tree(lazy_segment_tree: &mut LazySegmentTree<SSum, fn(&SSum, &SSum) -> SSum, fn() -> SSum, isize, fn(&isize, &SSum) -> SSum, fn(&isize, &isize) -> isize, fn() -> isize>) {
-        // 区間和取得用の遅延評価セグメント木の各ノードの、
-        // 守備範囲の大きさ(tree.size)を適切に初期化する関数
         // 葉のノードについてはtree.sizeを、元の配列部分だけ1にして、範囲外は0のままにする
         let first_list_index = lazy_segment_tree.tree_size / 2; // 木における配列先頭のindex
         for i in 0..lazy_segment_tree.list_size {
@@ -714,6 +709,14 @@ pub mod lazy_segment_tree {
         }
     }
 
+    /// 区間和取得用のdataノードの構造体
+    #[derive(Clone, Debug, Copy)]
+    pub struct SSum {
+        pub value: isize,
+        size: isize
+    }
+    
+    // メソッドの実装
     impl<S, Op, E, F, Mapping, Composition, Id> LazySegmentTree<S, Op, E, F, Mapping, Composition, Id>
     where
         S: Clone + std::fmt::Debug,                         // セグメント木のノードに格納されたデータ型
