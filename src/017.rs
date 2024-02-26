@@ -89,7 +89,7 @@ fn main() {
     // bit.sum(6);    
 }
 
-
+// BITは、要素加算、区間和を求めるセグメント木と同じ。
 /// Binary Indexed Tree (BIT)
 /// 参考: https://algo-logic.info/binary-indexed-tree/
 /// (1)構築: O(N)
