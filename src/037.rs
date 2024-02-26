@@ -152,6 +152,7 @@ fn main() {
 // セグメント木
 // Derive注釈は、自作の構造体に有用な振る舞いを追加する。(Debugはprintの為、Cloneはベクトルの要素として使う為に追加した)
 // 参考: https://doc.rust-jp.rs/book-ja/ch05-02-example-structs.html?highlight=derive#%E3%83%88%E3%83%AC%E3%82%A4%E3%83%88%E3%81%AE%E5%B0%8E%E5%87%BA%E3%81%A7%E6%9C%89%E7%94%A8%E3%81%AA%E6%A9%9F%E8%83%BD%E3%82%92%E8%BF%BD%E5%8A%A0%E3%81%99%E3%82%8B
+// 本問は、要素を再代入更新し、区間の最大値を取得するタイプのセグメント木。
 #[derive(Debug, Clone)]
 struct SegmentTree {
     // 探索対象の配列の大きさ
