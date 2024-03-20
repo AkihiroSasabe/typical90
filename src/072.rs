@@ -18,7 +18,7 @@ fn main() {
             // (i, j)を始点と終点とする。
             if c[i][j] == '#' {continue}
             let mut seen = vec![vec![false; w]; h];
-            dfs(& c, i, j, 0, seen, h, w, i, j, &mut max_depth)
+            dfs(& c, i, j, 0, &mut seen, h, w, i, j, &mut max_depth)
         }
     }
     if max_depth == 0 {
@@ -31,28 +31,35 @@ fn main() {
 }
 
 
-fn dfs(map: &Vec<Vec<char>>, y: usize, x: usize, current_depth: usize, mut seen: Vec<Vec<bool>>, h: usize, w: usize, y_end: usize, x_end: usize, max_depth: &mut usize) {
+fn dfs(map: &Vec<Vec<char>>, y: usize, x: usize, current_depth: usize, seen: &mut Vec<Vec<bool>>, h: usize, w: usize, y_end: usize, x_end: usize, max_depth: &mut usize) {
     // println!("y: {}, x: {}, current_depth: {}, y_end: {}, x_end: {}", y, x, current_depth, y_end, x_end);
     seen[y][x] = true;
     // 左上右下
-    let cross: [[isize; 2]; 4] = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+    let dir: [[isize; 2]; 4] = [[0, -1], [1, 0], [0, 1], [-1, 0]];
     for i in 0..4 {
-        // println!("checking...");
-        let next_y = y as isize + cross[i][0];
-        let next_x = x as isize + cross[i][1];
+        let next_y = y as isize + dir[i][0];
+        let next_x = x as isize + dir[i][1];
         // 画像の外
         if next_y < 0 || h as isize <= next_y || next_x < 0 || w as isize <= next_x {continue}
+
+        // キャスト
+        let next_y = next_y as usize;
+        let next_x = next_x as usize;
+        
         // 始点(終点)にたどり着いたとき
-        if next_y as usize == y_end && next_x as usize == x_end && 3 <= current_depth + 1 {
+        if next_y == y_end && next_x  == x_end && 3 <= current_depth + 1 {
             *max_depth = max(*max_depth, current_depth + 1);
             // println!("current max!: {}", current_depth + 1);
             continue
         }
         // 既に通過済み
-        if seen[next_y as usize][next_x as usize] {continue}
+        if seen[next_y][next_x] {continue}
         // 山
-        if map[next_y as usize][next_x as usize] == '#' {continue}
-        dfs(map, next_y as usize, next_x as usize, current_depth + 1, seen.clone(), h, w, y_end, x_end, max_depth);
+        if map[next_y][next_x] == '#' {continue}
+        dfs(map, next_y, next_x, current_depth + 1, seen, h, w, y_end, x_end, max_depth);
     }
-    // 帰りがけ
+    // バックトラック := 頂点vより先を全て調べ終わったら(行き止まりに突き当たったら)、1手戻る
+    // => 帰りがけに、seenをもとに戻す
+    seen[y][x] = false;
+
 }
