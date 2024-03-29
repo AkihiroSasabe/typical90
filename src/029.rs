@@ -14,7 +14,7 @@ fn main() {
     // solve_1_rinc_rmin_aoj();            // 2024-01-18 実装
     // solve_4_rass_rmin_aoj();            // 2024-01-20 実装
     // solve_6_rass_rsum_aoj();            // 2024-01-20 実装
-    // solve_3mod_rinc_rsum_abc179d();     // 2024-03-29 実装
+    // solve_3mod_rinc_rsum_abc179d();     // 2024-03-29 実装 (モジュール内が、modulus = 998244353　なので注意。適宜書き換えが要る。)
 }
 
 fn solve_5_rass_rsam_typical_no29() {
@@ -316,6 +316,8 @@ fn solve_3mod_rinc_rsum_abc179d() {
     let one = mi_generator.generate(1);
     let mut init_vector = vec![zero; n];
     init_vector[0] = one;
+
+    // ※モジュール内が、modulus = 998244353　で、ハードコーディングされているので注意。適宜書き換えが要る。
     let mut lazy_segment_tree = lazy_segment_tree::mod_new_range_increment_update_and_range_sum_query_from_vec(&init_vector);
 
     for i in 0..n-1 {
