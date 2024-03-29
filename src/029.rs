@@ -3,6 +3,7 @@ fn main() {
     // RMQ and RAQ  ([1]区間加算更新、区間最小値取得)   https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=DSL_2_H&lang=ja
     // ABC327F      ([2]区間加算更新、区間最大値取得)   https://atcoder.jp/contests/abc327/tasks/abc327_f
     // RSQ and RAQ  ([3]区間加算更新、区間和取得)       https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=DSL_2_G&lang=ja
+    // ModInt + RSQ and RAQ  ([3-mod] ModInt区間加算更新、区間和取得)       https://atcoder.jp/contests/abc179/tasks/abc179_d
     // RMQ and RUQ  ([4]区間代入更新、区間最小値取得)   https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=DSL_2_F&lang=ja
     // 典型29は     ([5]区間代入更新、区間最大値取得)   https://atcoder.jp/contests/typical90/tasks/typical90_ac
     // RSQ and RUQ  ([6]区間代入更新、区間和取得)       https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=DSL_2_I&lang=ja 
@@ -13,6 +14,7 @@ fn main() {
     // solve_1_rinc_rmin_aoj();            // 2024-01-18 実装
     // solve_4_rass_rmin_aoj();            // 2024-01-20 実装
     // solve_6_rass_rsum_aoj();            // 2024-01-20 実装
+    // solve_3mod_rinc_rsum_abc179d();     // 2024-03-29 実装
 }
 
 fn solve_5_rass_rsam_typical_no29() {
@@ -289,6 +291,81 @@ fn solve_6_rass_rsum_aoj() {
     }
 }
 
+fn solve_3mod_rinc_rsum_abc179d() {
+    let nk: Vec<usize> = read_vec_usize();
+    let n = nk[0];
+    let k = nk[1];
+    
+    let mut l = vec![];
+    let mut r = vec![];
+
+    for i in 0..k {
+        let lr_i: Vec<usize> = read_vec_usize();
+        let li = lr_i[0];
+        let ri = lr_i[1];
+        l.push(li);
+        r.push(ri);
+    }
+
+    let modulus = 998_244_353;
+
+
+    // 遅延評価セグメント木 + Modint
+    let mi_generator = ModintGenerator::new(modulus);
+    let zero = mi_generator.generate(0);
+    let one = mi_generator.generate(1);
+    let mut init_vector = vec![zero; n];
+    init_vector[0] = one;
+    let mut lazy_segment_tree = lazy_segment_tree::mod_new_range_increment_update_and_range_sum_query_from_vec(&init_vector);
+
+    for i in 0..n-1 {
+        for j in 0..k {
+            let l_ij = i + l[j];
+            let r_ij = std::cmp::min(i + r[j], n-1);
+            if l_ij > n - 1 {
+                continue
+            }
+            let num_state_i = lazy_segment_tree.range_query(i, i).value;
+            lazy_segment_tree.range_update(l_ij, r_ij, num_state_i);
+        }
+    }
+    let ans = lazy_segment_tree.range_query(n-1, n-1).value.value;
+    println!("{}", ans % modulus);
+}
+
+// Aizu Online Judge の遅延評価セグメント木の問題の入力受け取り用の関数
+// AOJは、proconio が使えない
+fn input_for_aoj() -> (usize, usize, Vec<Vec<isize>>) {
+    let nq: Vec<usize> = read_vec_usize();
+    let n: usize = nq[0];
+    let q: usize = nq[1];
+    let mut queries = vec![];
+    for i in 0..q {
+        let query: Vec<isize> = read_vec_isize();
+        queries.push(query);
+    }
+    return (n, q, queries)
+}
+
+// インタラクティブな読み込みをする関数 (1行に複数のusize)
+fn read_vec_usize() -> Vec<usize> {
+    let mut line_string = String::new();
+    std::io::stdin().read_line(&mut line_string).expect("入力エラー");
+    let line_str_list: Vec<&str> = line_string.split_whitespace().collect();
+    let line_usize_list: Vec<usize> = line_str_list.into_iter().map(|i| (i.parse().expect("変換エラー"))).collect();
+    return line_usize_list
+}
+
+// インタラクティブな読み込みをする関数 (1行に複数のisize)
+fn read_vec_isize() -> Vec<isize> {
+    let mut line_string = String::new();
+    std::io::stdin().read_line(&mut line_string).expect("入力エラー");
+    let line_str_list: Vec<&str> = line_string.split_whitespace().collect();
+    let line_isize_list: Vec<isize> = line_str_list.into_iter().map(|i| (i.parse().expect("変換エラー"))).collect();
+    return line_isize_list
+}
+
+
 // 抽象化した遅延評価セグメント木を実装する
 // 参考実装 (ACLのC++のコードと、kenkooooさんのRust化されたコード)
 // https://github.com/atcoder/ac-library/blob/master/atcoder/lazysegtree.hpp
@@ -476,11 +553,58 @@ pub mod lazy_segment_tree {
 
         return lazy_segment_tree
     }
+    
+    // [3-mod] 区間加算更新・区間和取得　の生成
+    pub fn mod_new_range_increment_update_and_range_sum_query(list_size: usize) -> LazySegmentTree<SSumMod, fn(&SSumMod, &SSumMod) -> SSumMod, fn() -> SSumMod, Modint, fn(&Modint, &SSumMod) -> SSumMod, fn(&Modint, &Modint) -> Modint, fn() -> Modint> {    
+        fn op(&s0: &SSumMod, &s1:  &SSumMod) -> SSumMod {
+            return SSumMod {value: s0.value + s1.value, size: s0.size + s1.size}
+        }
+        fn mapping(&f: &Modint ,&x: &SSumMod) -> SSumMod {
+            return SSumMod {value: x.value + x.size * f, size: x.size}
+        }
+        fn composition(&f: &Modint ,&g: &Modint) -> Modint {
+            f + g
+        }
+        fn e() -> SSumMod {
+            let init_value: Modint = Modint{modulus: 998244353, value: 0};
+            let init_size: isize = 0;
+            return SSumMod {value: init_value, size: init_size}
+        }
+        fn id() -> Modint {
+            let init_value: Modint = Modint{modulus: 998244353, value: 0};
+            return init_value
+        }
+        
+        let mut lazy_segment_tree = LazySegmentTree::new(
+            list_size,
+            e as fn() -> SSumMod, 
+            op as fn(&SSumMod, &SSumMod) -> SSumMod, 
+            mapping as fn(&Modint, &SSumMod) -> SSumMod, 
+            composition as fn(&Modint, &Modint) -> Modint, 
+            id as fn() -> Modint
+        );
+
+        // 各ノードの、守備範囲の大きさ(tree.size)を適切に初期化
+        mod_init_node_size_for_range_sum_tree(&mut lazy_segment_tree);
+
+        return lazy_segment_tree
+    }
 
     // [3] 区間加算更新・区間和取得 を vector から生成
     pub fn new_range_increment_update_and_range_sum_query_from_vec(init_vector: &Vec<isize>) -> LazySegmentTree<SSum, fn(&SSum, &SSum) -> SSum, fn() -> SSum, isize, fn(&isize, &SSum) -> SSum, fn(&isize, &isize) -> isize, fn() -> isize> {
         let n = init_vector.len();
         let mut lazy_segment_tree = new_range_increment_update_and_range_sum_query(n);
+        for i in 0..n {
+            lazy_segment_tree.range_update(i, i, init_vector[i]);
+        }
+        return lazy_segment_tree
+    }
+    
+    // [3-mod] 区間加算更新・区間和取得 を vector から生成
+    use crate::Modint;
+    pub fn mod_new_range_increment_update_and_range_sum_query_from_vec(init_vector: &Vec<Modint>) -> LazySegmentTree<SSumMod, fn(&SSumMod, &SSumMod) -> SSumMod, fn() -> SSumMod, Modint, fn(&Modint, &SSumMod) -> SSumMod, fn(&Modint, &Modint) -> Modint, fn() -> Modint> {
+        let n = init_vector.len();
+        let mut lazy_segment_tree = mod_new_range_increment_update_and_range_sum_query(n);
         for i in 0..n {
             lazy_segment_tree.range_update(i, i, init_vector[i]);
         }
@@ -709,10 +833,38 @@ pub mod lazy_segment_tree {
         }
     }
 
+    // mod 区間和取得用の遅延評価セグメント木の各ノードの、守備範囲の大きさ(tree.size)を適切に初期化する関数
+    fn mod_init_node_size_for_range_sum_tree(lazy_segment_tree: &mut LazySegmentTree<SSumMod, fn(&SSumMod, &SSumMod) -> SSumMod, fn() -> SSumMod, Modint, fn(&Modint, &SSumMod) -> SSumMod, fn(&Modint, &Modint) -> Modint, fn() -> Modint>) {
+        // 葉のノードについてはtree.sizeを、元の配列部分だけ1にして、範囲外は0のままにする
+        let first_list_index = lazy_segment_tree.tree_size / 2; // 木における配列先頭のindex
+        for i in 0..lazy_segment_tree.list_size {
+            lazy_segment_tree.tree[i + first_list_index].size = 1;
+        }
+
+        // 木の最下段から、根に向かって、親ノードの守備範囲の大きさを計算
+        let mut current_stage_size = lazy_segment_tree.leaf_size;
+        let mut current_stage_first_index = first_list_index;
+        while current_stage_size != 1 {
+            for i in 0..current_stage_size {
+                let v = current_stage_first_index + i;
+                // p := parent index
+                let p = (v - 1) / 2;
+                lazy_segment_tree.tree[p].size += lazy_segment_tree.tree[v].size;
+            }
+            current_stage_size /= 2;
+            current_stage_first_index /= 2;
+        }
+    }
+
     /// 区間和取得用のdataノードの構造体
     #[derive(Clone, Debug, Copy)]
     pub struct SSum {
         pub value: isize,
+        size: isize
+    }
+    #[derive(Clone, Debug, Copy)]
+    pub struct SSumMod {
+        pub value: Modint,
         size: isize
     }
     
@@ -914,34 +1066,405 @@ pub mod lazy_segment_tree {
     }    
 }
 
-// Aizu Online Judge の遅延評価セグメント木の問題の入力受け取り用の関数
-// AOJは、proconio が使えない
-fn input_for_aoj() -> (usize, usize, Vec<Vec<isize>>) {
-    let nq: Vec<usize> = read_vec_usize();
-    let n: usize = nq[0];
-    let q: usize = nq[1];
-    let mut queries = vec![];
-    for i in 0..q {
-        let query: Vec<isize> = read_vec_isize();
-        queries.push(query);
+
+// ModIntの実装参考
+// https://qiita.com/namn1125/items/5100cb85021a1d6e8f6c
+// https://github.com/rust-lang-ja/ac-library-rs/blob/master/src/modint.rs
+// https://github.com/kenkoooo/competitive-programming-rs/blob/master/src/math/mod_int.rs
+// AtCoderの公式(C++): https://github.com/atcoder/ac-library/blob/master/document_ja/modint.md
+struct ModintGenerator {
+    modulus: isize
+}
+
+impl ModintGenerator {
+    fn new(modulus: isize) -> ModintGenerator {
+        ModintGenerator {modulus: modulus}
     }
-    return (n, q, queries)
+    fn generate(&self, value: isize) -> Modint {
+        let modint = Modint::new(self.modulus, value);
+        return modint
+    }
 }
 
-// インタラクティブな読み込みをする関数 (1行に複数のusize)
-fn read_vec_usize() -> Vec<usize> {
-    let mut line_string = String::new();
-    std::io::stdin().read_line(&mut line_string).expect("入力エラー");
-    let line_str_list: Vec<&str> = line_string.split_whitespace().collect();
-    let line_usize_list: Vec<usize> = line_str_list.into_iter().map(|i| (i.parse().expect("変換エラー"))).collect();
-    return line_usize_list
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub struct Modint {
+    modulus: isize,
+    value: isize,
 }
 
-// インタラクティブな読み込みをする関数 (1行に複数のisize)
-fn read_vec_isize() -> Vec<isize> {
-    let mut line_string = String::new();
-    std::io::stdin().read_line(&mut line_string).expect("入力エラー");
-    let line_str_list: Vec<&str> = line_string.split_whitespace().collect();
-    let line_isize_list: Vec<isize> = line_str_list.into_iter().map(|i| (i.parse().expect("変換エラー"))).collect();
-    return line_isize_list
+impl Modint {
+    fn new(modulus: isize, value: isize) -> Modint {
+        Modint{modulus: modulus, value: value % modulus}
+    }
+    // mod p を法とした時の逆数(逆元という) 1 / a の値
+    fn inverse(&self) -> Self {
+        // フェルマーの小定理
+        //     a^(p-1) = 1     (mod p)
+        // <=> a * a^(p-2) = 1 (mod p)
+        // <=> 1 / a = a^(p-2) (mod p)
+        // (ただし、法pは素数)
+        self.pow(self.modulus - 2)
+    }
+
+    // mod p を法とした時の累乗
+    // base^(x) % mod を繰り返し二乗法により、O(log2(x))の計算量で求める　(O(x)だとTLE)
+    // No.69参照
+    fn pow(&self, mut exponent: isize) -> Self {
+        // 例: 3^4= (3^2)^2 = 9^2 = 81^1
+        // 初期
+        // 3^4
+        // remainder=1
+        // base=3
+        // exp=4
+
+        // i=0:
+        // remainder = 1
+        // base = 3 * 3 = 9
+        // exp = 4 / 2 = 2
+
+        // i=1:
+        // remainder = 1
+        // base = 9 * 9 = 81
+        // exp = 2 / 2 = 1
+
+        // i=2:
+        // remainder = remainder * base = 81
+        // base = 81 * 81
+        // exp = 1 / 2 = 0
+        let mut base = self.value;
+
+        let mut remainder = 1;
+        while exponent != 0 {
+            if exponent % 2 == 1 {
+                remainder = (remainder * base) % self.modulus;
+            }
+            base = (base * base) % self.modulus;
+            exponent /= 2;
+        }
+        Self {
+            modulus: self.modulus,
+            value: remainder
+        }
+    }
+
+}
+
+
+use std::fmt;
+
+// To use the `{}` marker, the trait `fmt::Display` must be implemented
+// manually for the type.
+// `{}` というマーカーを使用するためには、
+// この型専用の`fmt::Display`というトレイトが実装されていなくてはなりません。
+impl fmt::Display for Modint {
+    // This trait requires `fmt` with this exact signature.
+    // このトレイトは`fmt`が想定通りのシグネチャであることを要求します。
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // Write strictly the first element into the supplied output
+        // stream: `f`. Returns `fmt::Result` which indicates whether the
+        // operation succeeded or failed. Note that `write!` uses syntax which
+        // is very similar to `println!`.
+        // 厳密に最初の要素を、与えられた出力ストリーム `f` に書き込みます。
+        // `fmt::Result`を返します。これはオペレーションが成功したか否か
+        // を表します。
+        // `write!`は`println!`に非常によく似た文法を使用していることに注目。
+        write!(f, "{}", self.value)
+    }
+}
+
+// impl トレイト for 構造体 {}
+// +演算子
+impl std::ops::Add for Modint {
+    type Output = Self;
+
+    fn add(self, other: Self) -> Self {
+        Self {
+            modulus: self.modulus,
+            value: (self.value + other.value) % self.modulus
+        }
+    }
+}
+
+// += 演算子
+impl std::ops::AddAssign for Modint {
+    fn add_assign(&mut self, other: Self) {
+        *self = Self {
+            modulus: self.modulus,
+            value: (self.value + other.value) % self.modulus
+        }
+    }
+}
+
+// *演算子
+impl std::ops::Mul for Modint {
+    // The multiplication of rational numbers is a closed operation.
+    type Output = Self;
+
+    fn mul(self, other: Self) -> Self {
+        Self {
+            modulus: self.modulus,
+            value: (self.value * other.value) % self.modulus 
+        }
+    }
+}
+
+// *=演算子
+impl std::ops::MulAssign for Modint {
+    fn mul_assign(&mut self, other: Self) {
+        *self = Self {
+            modulus: self.modulus,
+            value: (self.value * other.value) % self.modulus
+        }
+    }
+}
+
+// -演算子
+impl std::ops::Sub for Modint {
+    type Output = Self;
+
+    fn sub(self, other: Self) -> Self::Output {
+        Self {
+            modulus: self.modulus,
+            // 引き算が負にならないようにmodulusを足しておく
+            value: (self.modulus + self.value - other.value) % self.modulus
+        }
+    }
+}
+
+// -=演算子
+impl std::ops::SubAssign for Modint {
+    fn sub_assign(&mut self, other: Self) {
+        *self = Self {
+            modulus: self.modulus,
+            // 引き算が負にならないようにmodulusを足しておく
+            value: (self.modulus + self.value - other.value) % self.modulus
+        };
+    }
+}
+
+// /演算子
+impl std::ops::Div for Modint {
+    // The division of rational numbers is a closed operation.
+    type Output = Self;
+
+    fn div(self, other: Self) -> Self {
+        if other.value == 0 {
+            panic!("Cannot divide by zero-valued `Rational`!");
+        }
+        Self {
+            modulus: self.modulus,
+            value: (self.value * other.inverse().value) % self.modulus 
+        }
+    }
+}
+
+// /=演算子
+impl std::ops::DivAssign for Modint {
+    fn div_assign(&mut self, other: Self) {
+        *self = Self {
+            modulus: self.modulus,
+            value: (self.value * other.inverse().value) % self.modulus
+        };
+    }
+}
+
+
+// isize型との演算
+// ModInt * 整数
+impl std::ops::Mul<isize> for Modint {
+    type Output = Modint;
+
+    fn mul(self, other: isize) -> Modint {
+        Modint {
+            modulus: self.modulus,
+            value: (self.value * (other % self.modulus)) % self.modulus,
+        }
+    }
+}
+
+// 整数 * ModInt
+impl std::ops::Mul<Modint> for isize {
+    type Output = Modint;
+
+    fn mul(self, other: Modint) -> Modint {
+        Modint {
+            modulus: other.modulus,
+            value: ((self % other.modulus) * other.value) % other.modulus,
+        }
+    }
+}
+
+// ModInt *= 整数
+impl std::ops::MulAssign<isize> for Modint {
+    fn mul_assign(&mut self, other: isize) {
+        *self = Self {
+            modulus: self.modulus,
+            value: (self.value * (other % self.modulus)) % self.modulus
+        }
+    }
+}
+
+
+// ModInt + 整数
+impl std::ops::Add<isize> for Modint {
+    type Output = Modint;
+
+    fn add(self, other: isize) -> Modint {
+        Modint {
+            modulus: self.modulus,
+            value: (self.value + other) % self.modulus,
+        }
+    }
+}
+
+// 整数 + ModInt
+impl std::ops::Add<Modint> for isize {
+    type Output = Modint;
+
+    fn add(self, other: Modint) -> Modint {
+        Modint {
+            modulus: other.modulus,
+            value: ((self % other.modulus) + other.value) % other.modulus,
+        }
+    }
+}
+
+// ModInt += 整数
+impl std::ops::AddAssign<isize> for Modint {
+    fn add_assign(&mut self, other: isize) {
+        *self = Self {
+            modulus: self.modulus,
+            value: (self.value + (other % self.modulus)) % self.modulus
+        }
+    }
+}
+
+
+
+
+
+
+
+// ModInt - 整数
+impl std::ops::Sub<isize> for Modint {
+    type Output = Modint;
+
+    fn sub(self, other: isize) -> Modint {
+        Modint {
+            modulus: self.modulus,
+            value: (self.modulus + self.value - other) % self.modulus,
+        }
+    }
+}
+
+// 整数 - ModInt
+impl std::ops::Sub<Modint> for isize {
+    type Output = Modint;
+
+    fn sub(self, other: Modint) -> Modint {
+        Modint {
+            modulus: other.modulus,
+            value: (other.modulus + (self % other.modulus) - other.value) % other.modulus,
+        }
+    }
+}
+
+// ModInt -= 整数
+impl std::ops::SubAssign<isize> for Modint {
+    fn sub_assign(&mut self, other: isize) {
+        *self = Self {
+            modulus: self.modulus,
+            value: (self.modulus + self.value - (other % self.modulus)) % self.modulus
+        }
+    }
+}
+
+
+
+
+
+
+// ModInt / 整数
+impl std::ops::Div<isize> for Modint {
+    type Output = Modint;
+
+    fn div(self, other: isize) -> Modint {
+        let other_modint = Modint::new(self.modulus, other);
+        return self / other_modint
+    }
+}
+
+// 整数 / ModInt
+impl std::ops::Div<Modint> for isize {
+    type Output = Modint;
+
+    fn div(self, other: Modint) -> Modint {
+        let self_modint = Modint::new(other.modulus, self);
+        return self_modint / other
+    }
+}
+
+// ModInt /= 整数
+impl std::ops::DivAssign<isize> for Modint {
+    fn div_assign(&mut self, other: isize) {
+        let other_modint = Modint::new(self.modulus, other);
+        *self = *self / other_modint;
+    }
+}
+
+
+
+
+
+// mod p を法とした時の割り算 a / b の値
+fn mod_dev(a: isize, b: isize, modulo: isize) -> isize {
+    return a * mod_inverse(b, modulo) % modulo
+}
+
+// mod p を法とした時の逆数(逆元という) 1 / b の値
+fn mod_inverse(a: isize, modulo: isize) -> isize {
+    // フェルマーの小定理
+    //     a^(p-1) = 1     (mod p)
+    // <=> a * a^(p-2) = 1 (mod p)
+    // <=> 1 / a = a^(p-2) (mod p)
+    // (ただし、法pは素数)
+
+    return mod_pow(a, modulo - 2, modulo)
+}
+
+// mod p を法とした時の累乗
+// base^(x) % mod を繰り返し二乗法により、O(log2(x))の計算量で求める　(O(x)だとTLE)
+// No.69参照
+fn mod_pow(mut base: isize, mut exponent: isize, modulo: isize) -> isize {
+    // 例: 3^4= (3^2)^2 = 9^2 = 81^1
+    // 初期
+    // 3^4
+    // remainder=1
+    // base=3
+    // exp=4
+
+    // i=0:
+    // remainder = 1
+    // base = 3 * 3 = 9
+    // exp = 4 / 2 = 2
+
+    // i=1:
+    // remainder = 1
+    // base = 9 * 9 = 81
+    // exp = 2 / 2 = 1
+
+    // i=2:
+    // remainder = remainder * base = 81
+    // base = 81 * 81
+    // exp = 1 / 2 = 0
+
+    let mut remainder = 1;
+    while exponent != 0 {
+        if exponent % 2 == 1 {
+            remainder = (remainder * base) % modulo;
+        }
+        base = (base * base) % modulo;
+        exponent /= 2;
+    }
+    return remainder
 }
