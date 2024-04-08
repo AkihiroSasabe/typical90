@@ -1065,6 +1065,15 @@ pub mod lazy_segment_tree {
             self._print_tree("lazy_tree");
             println!("==== ==== ==== ==== ==== =====");
         }
+        pub fn print_all_single_queries(&mut self) {
+            // 単一区間のクエリを、配列の全範囲に渡ってprintする。
+            println!("==== All single queries ====");
+            for i in 0..self.list_size {
+                print!("{:?}, ", self.range_query(i, i));
+            }
+            println!("");
+            println!("---- ---- ---- ---- ---- ----");
+        }
     }    
 }
 
