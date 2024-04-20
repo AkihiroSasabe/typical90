@@ -311,7 +311,7 @@ fn solve_3mod_rinc_rsum_abc179d() {
 
 
     // 遅延評価セグメント木 + Modint
-    let mi_generator = ModintGenerator::new(modulus);
+    let mi_generator = modint::ModintGenerator::new(modulus);
     let zero = mi_generator.generate(0);
     let one = mi_generator.generate(1);
     let mut init_vector = vec![zero; n];
@@ -603,7 +603,7 @@ pub mod lazy_segment_tree {
     }
     
     // [3-mod] 区間加算更新・区間和取得 を vector から生成
-    use crate::Modint;
+    use crate::modint::Modint;
     pub fn mod_new_range_increment_update_and_range_sum_query_from_vec(init_vector: &Vec<Modint>) -> LazySegmentTree<SSumMod, fn(&SSumMod, &SSumMod) -> SSumMod, fn() -> SSumMod, Modint, fn(&Modint, &SSumMod) -> SSumMod, fn(&Modint, &Modint) -> Modint, fn() -> Modint> {
         let n = init_vector.len();
         let mut lazy_segment_tree = mod_new_range_increment_update_and_range_sum_query(n);
@@ -1078,49 +1078,376 @@ pub mod lazy_segment_tree {
 }
 
 
-// ModIntの実装参考
-// https://qiita.com/namn1125/items/5100cb85021a1d6e8f6c
-// https://github.com/rust-lang-ja/ac-library-rs/blob/master/src/modint.rs
-// https://github.com/kenkoooo/competitive-programming-rs/blob/master/src/math/mod_int.rs
-// AtCoderの公式(C++): https://github.com/atcoder/ac-library/blob/master/document_ja/modint.md
-struct ModintGenerator {
-    modulus: isize
-}
-
-impl ModintGenerator {
-    fn new(modulus: isize) -> ModintGenerator {
-        ModintGenerator {modulus: modulus}
+pub mod modint {
+    // ModIntの実装参考
+    // https://qiita.com/namn1125/items/5100cb85021a1d6e8f6c
+    // https://github.com/rust-lang-ja/ac-library-rs/blob/master/src/modint.rs
+    // https://github.com/kenkoooo/competitive-programming-rs/blob/master/src/math/mod_int.rs
+    // AtCoderの公式(C++): https://github.com/atcoder/ac-library/blob/master/document_ja/modint.md
+    pub struct ModintGenerator {
+        modulus: isize
     }
-    fn generate(&self, value: isize) -> Modint {
-        let modint = Modint::new(self.modulus, value);
-        return modint
-    }
-}
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub struct Modint {
-    modulus: isize,
-    value: isize,
-}
-
-impl Modint {
-    fn new(modulus: isize, value: isize) -> Modint {
-        Modint{modulus: modulus, value: value % modulus}
+    impl ModintGenerator {
+        pub fn new(modulus: isize) -> ModintGenerator {
+            ModintGenerator {modulus: modulus}
+        }
+        pub fn generate(&self, value: isize) -> Modint {
+            let modint = Modint::new(self.modulus, value);
+            return modint
+        }
     }
-    // mod p を法とした時の逆数(逆元という) 1 / a の値
-    fn inverse(&self) -> Self {
+
+    #[derive(Debug, Copy, Clone, PartialEq, Eq)]
+    pub struct Modint {
+        pub modulus: isize,
+        pub value: isize,
+    }
+
+    impl Modint {
+        fn new(modulus: isize, value: isize) -> Modint {
+            Modint{modulus: modulus, value: value % modulus}
+        }
+        // mod p を法とした時の逆数(逆元という) 1 / a の値
+        fn inverse(&self) -> Self {
+            // フェルマーの小定理
+            //     a^(p-1) = 1     (mod p)
+            // <=> a * a^(p-2) = 1 (mod p)
+            // <=> 1 / a = a^(p-2) (mod p)
+            // (ただし、法pは素数)
+            self.pow(self.modulus - 2)
+        }
+
+        // mod p を法とした時の累乗
+        // base^(x) % mod を繰り返し二乗法により、O(log2(x))の計算量で求める　(O(x)だとTLE)
+        // No.69参照
+        fn pow(&self, mut exponent: isize) -> Self {
+            // 例: 3^4= (3^2)^2 = 9^2 = 81^1
+            // 初期
+            // 3^4
+            // remainder=1
+            // base=3
+            // exp=4
+
+            // i=0:
+            // remainder = 1
+            // base = 3 * 3 = 9
+            // exp = 4 / 2 = 2
+
+            // i=1:
+            // remainder = 1
+            // base = 9 * 9 = 81
+            // exp = 2 / 2 = 1
+
+            // i=2:
+            // remainder = remainder * base = 81
+            // base = 81 * 81
+            // exp = 1 / 2 = 0
+            let mut base = self.value;
+
+            let mut remainder = 1;
+            while exponent != 0 {
+                if exponent % 2 == 1 {
+                    remainder = (remainder * base) % self.modulus;
+                }
+                base = (base * base) % self.modulus;
+                exponent /= 2;
+            }
+            Self {
+                modulus: self.modulus,
+                value: remainder
+            }
+        }
+
+    }
+
+
+    use std::fmt;
+
+    // To use the `{}` marker, the trait `fmt::Display` must be implemented
+    // manually for the type.
+    // `{}` というマーカーを使用するためには、
+    // この型専用の`fmt::Display`というトレイトが実装されていなくてはなりません。
+    impl fmt::Display for Modint {
+        // This trait requires `fmt` with this exact signature.
+        // このトレイトは`fmt`が想定通りのシグネチャであることを要求します。
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            // Write strictly the first element into the supplied output
+            // stream: `f`. Returns `fmt::Result` which indicates whether the
+            // operation succeeded or failed. Note that `write!` uses syntax which
+            // is very similar to `println!`.
+            // 厳密に最初の要素を、与えられた出力ストリーム `f` に書き込みます。
+            // `fmt::Result`を返します。これはオペレーションが成功したか否か
+            // を表します。
+            // `write!`は`println!`に非常によく似た文法を使用していることに注目。
+            write!(f, "{}", self.value)
+        }
+    }
+
+    // impl トレイト for 構造体 {}
+    // +演算子
+    impl std::ops::Add for Modint {
+        type Output = Self;
+
+        fn add(self, other: Self) -> Self {
+            Self {
+                modulus: self.modulus,
+                value: (self.value + other.value) % self.modulus
+            }
+        }
+    }
+
+    // += 演算子
+    impl std::ops::AddAssign for Modint {
+        fn add_assign(&mut self, other: Self) {
+            *self = Self {
+                modulus: self.modulus,
+                value: (self.value + other.value) % self.modulus
+            }
+        }
+    }
+
+    // *演算子
+    impl std::ops::Mul for Modint {
+        // The multiplication of rational numbers is a closed operation.
+        type Output = Self;
+
+        fn mul(self, other: Self) -> Self {
+            Self {
+                modulus: self.modulus,
+                value: (self.value * other.value) % self.modulus 
+            }
+        }
+    }
+
+    // *=演算子
+    impl std::ops::MulAssign for Modint {
+        fn mul_assign(&mut self, other: Self) {
+            *self = Self {
+                modulus: self.modulus,
+                value: (self.value * other.value) % self.modulus
+            }
+        }
+    }
+
+    // -演算子
+    impl std::ops::Sub for Modint {
+        type Output = Self;
+
+        fn sub(self, other: Self) -> Self::Output {
+            Self {
+                modulus: self.modulus,
+                // 引き算が負にならないようにmodulusを足しておく
+                value: (self.modulus + self.value - other.value) % self.modulus
+            }
+        }
+    }
+
+    // -=演算子
+    impl std::ops::SubAssign for Modint {
+        fn sub_assign(&mut self, other: Self) {
+            *self = Self {
+                modulus: self.modulus,
+                // 引き算が負にならないようにmodulusを足しておく
+                value: (self.modulus + self.value - other.value) % self.modulus
+            };
+        }
+    }
+
+    // /演算子
+    impl std::ops::Div for Modint {
+        // The division of rational numbers is a closed operation.
+        type Output = Self;
+
+        fn div(self, other: Self) -> Self {
+            if other.value == 0 {
+                panic!("Cannot divide by zero-valued `Rational`!");
+            }
+            Self {
+                modulus: self.modulus,
+                value: (self.value * other.inverse().value) % self.modulus 
+            }
+        }
+    }
+
+    // /=演算子
+    impl std::ops::DivAssign for Modint {
+        fn div_assign(&mut self, other: Self) {
+            *self = Self {
+                modulus: self.modulus,
+                value: (self.value * other.inverse().value) % self.modulus
+            };
+        }
+    }
+
+
+    // isize型との演算
+    // ModInt * 整数
+    impl std::ops::Mul<isize> for Modint {
+        type Output = Modint;
+
+        fn mul(self, other: isize) -> Modint {
+            Modint {
+                modulus: self.modulus,
+                value: (self.value * (other % self.modulus)) % self.modulus,
+            }
+        }
+    }
+
+    // 整数 * ModInt
+    impl std::ops::Mul<Modint> for isize {
+        type Output = Modint;
+
+        fn mul(self, other: Modint) -> Modint {
+            Modint {
+                modulus: other.modulus,
+                value: ((self % other.modulus) * other.value) % other.modulus,
+            }
+        }
+    }
+
+    // ModInt *= 整数
+    impl std::ops::MulAssign<isize> for Modint {
+        fn mul_assign(&mut self, other: isize) {
+            *self = Self {
+                modulus: self.modulus,
+                value: (self.value * (other % self.modulus)) % self.modulus
+            }
+        }
+    }
+
+
+    // ModInt + 整数
+    impl std::ops::Add<isize> for Modint {
+        type Output = Modint;
+
+        fn add(self, other: isize) -> Modint {
+            Modint {
+                modulus: self.modulus,
+                value: (self.value + other) % self.modulus,
+            }
+        }
+    }
+
+    // 整数 + ModInt
+    impl std::ops::Add<Modint> for isize {
+        type Output = Modint;
+
+        fn add(self, other: Modint) -> Modint {
+            Modint {
+                modulus: other.modulus,
+                value: ((self % other.modulus) + other.value) % other.modulus,
+            }
+        }
+    }
+
+    // ModInt += 整数
+    impl std::ops::AddAssign<isize> for Modint {
+        fn add_assign(&mut self, other: isize) {
+            *self = Self {
+                modulus: self.modulus,
+                value: (self.value + (other % self.modulus)) % self.modulus
+            }
+        }
+    }
+
+
+
+
+
+
+
+    // ModInt - 整数
+    impl std::ops::Sub<isize> for Modint {
+        type Output = Modint;
+
+        fn sub(self, other: isize) -> Modint {
+            Modint {
+                modulus: self.modulus,
+                value: (self.modulus + self.value - other) % self.modulus,
+            }
+        }
+    }
+
+    // 整数 - ModInt
+    impl std::ops::Sub<Modint> for isize {
+        type Output = Modint;
+
+        fn sub(self, other: Modint) -> Modint {
+            Modint {
+                modulus: other.modulus,
+                value: (other.modulus + (self % other.modulus) - other.value) % other.modulus,
+            }
+        }
+    }
+
+    // ModInt -= 整数
+    impl std::ops::SubAssign<isize> for Modint {
+        fn sub_assign(&mut self, other: isize) {
+            *self = Self {
+                modulus: self.modulus,
+                value: (self.modulus + self.value - (other % self.modulus)) % self.modulus
+            }
+        }
+    }
+
+
+
+
+
+
+    // ModInt / 整数
+    impl std::ops::Div<isize> for Modint {
+        type Output = Modint;
+
+        fn div(self, other: isize) -> Modint {
+            let other_modint = Modint::new(self.modulus, other);
+            return self / other_modint
+        }
+    }
+
+    // 整数 / ModInt
+    impl std::ops::Div<Modint> for isize {
+        type Output = Modint;
+
+        fn div(self, other: Modint) -> Modint {
+            let self_modint = Modint::new(other.modulus, self);
+            return self_modint / other
+        }
+    }
+
+    // ModInt /= 整数
+    impl std::ops::DivAssign<isize> for Modint {
+        fn div_assign(&mut self, other: isize) {
+            let other_modint = Modint::new(self.modulus, other);
+            *self = *self / other_modint;
+        }
+    }
+
+
+
+
+
+    // mod p を法とした時の割り算 a / b の値
+    fn mod_dev(a: isize, b: isize, modulo: isize) -> isize {
+        return a * mod_inverse(b, modulo) % modulo
+    }
+
+    // mod p を法とした時の逆数(逆元という) 1 / b の値
+    fn mod_inverse(a: isize, modulo: isize) -> isize {
         // フェルマーの小定理
         //     a^(p-1) = 1     (mod p)
         // <=> a * a^(p-2) = 1 (mod p)
         // <=> 1 / a = a^(p-2) (mod p)
         // (ただし、法pは素数)
-        self.pow(self.modulus - 2)
+
+        return mod_pow(a, modulo - 2, modulo)
     }
 
     // mod p を法とした時の累乗
     // base^(x) % mod を繰り返し二乗法により、O(log2(x))の計算量で求める　(O(x)だとTLE)
     // No.69参照
-    fn pow(&self, mut exponent: isize) -> Self {
+    fn mod_pow(mut base: isize, mut exponent: isize, modulo: isize) -> isize {
         // 例: 3^4= (3^2)^2 = 9^2 = 81^1
         // 初期
         // 3^4
@@ -1142,340 +1469,15 @@ impl Modint {
         // remainder = remainder * base = 81
         // base = 81 * 81
         // exp = 1 / 2 = 0
-        let mut base = self.value;
 
         let mut remainder = 1;
         while exponent != 0 {
             if exponent % 2 == 1 {
-                remainder = (remainder * base) % self.modulus;
+                remainder = (remainder * base) % modulo;
             }
-            base = (base * base) % self.modulus;
+            base = (base * base) % modulo;
             exponent /= 2;
         }
-        Self {
-            modulus: self.modulus,
-            value: remainder
-        }
+        return remainder
     }
-
-}
-
-
-use std::fmt;
-
-// To use the `{}` marker, the trait `fmt::Display` must be implemented
-// manually for the type.
-// `{}` というマーカーを使用するためには、
-// この型専用の`fmt::Display`というトレイトが実装されていなくてはなりません。
-impl fmt::Display for Modint {
-    // This trait requires `fmt` with this exact signature.
-    // このトレイトは`fmt`が想定通りのシグネチャであることを要求します。
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        // Write strictly the first element into the supplied output
-        // stream: `f`. Returns `fmt::Result` which indicates whether the
-        // operation succeeded or failed. Note that `write!` uses syntax which
-        // is very similar to `println!`.
-        // 厳密に最初の要素を、与えられた出力ストリーム `f` に書き込みます。
-        // `fmt::Result`を返します。これはオペレーションが成功したか否か
-        // を表します。
-        // `write!`は`println!`に非常によく似た文法を使用していることに注目。
-        write!(f, "{}", self.value)
-    }
-}
-
-// impl トレイト for 構造体 {}
-// +演算子
-impl std::ops::Add for Modint {
-    type Output = Self;
-
-    fn add(self, other: Self) -> Self {
-        Self {
-            modulus: self.modulus,
-            value: (self.value + other.value) % self.modulus
-        }
-    }
-}
-
-// += 演算子
-impl std::ops::AddAssign for Modint {
-    fn add_assign(&mut self, other: Self) {
-        *self = Self {
-            modulus: self.modulus,
-            value: (self.value + other.value) % self.modulus
-        }
-    }
-}
-
-// *演算子
-impl std::ops::Mul for Modint {
-    // The multiplication of rational numbers is a closed operation.
-    type Output = Self;
-
-    fn mul(self, other: Self) -> Self {
-        Self {
-            modulus: self.modulus,
-            value: (self.value * other.value) % self.modulus 
-        }
-    }
-}
-
-// *=演算子
-impl std::ops::MulAssign for Modint {
-    fn mul_assign(&mut self, other: Self) {
-        *self = Self {
-            modulus: self.modulus,
-            value: (self.value * other.value) % self.modulus
-        }
-    }
-}
-
-// -演算子
-impl std::ops::Sub for Modint {
-    type Output = Self;
-
-    fn sub(self, other: Self) -> Self::Output {
-        Self {
-            modulus: self.modulus,
-            // 引き算が負にならないようにmodulusを足しておく
-            value: (self.modulus + self.value - other.value) % self.modulus
-        }
-    }
-}
-
-// -=演算子
-impl std::ops::SubAssign for Modint {
-    fn sub_assign(&mut self, other: Self) {
-        *self = Self {
-            modulus: self.modulus,
-            // 引き算が負にならないようにmodulusを足しておく
-            value: (self.modulus + self.value - other.value) % self.modulus
-        };
-    }
-}
-
-// /演算子
-impl std::ops::Div for Modint {
-    // The division of rational numbers is a closed operation.
-    type Output = Self;
-
-    fn div(self, other: Self) -> Self {
-        if other.value == 0 {
-            panic!("Cannot divide by zero-valued `Rational`!");
-        }
-        Self {
-            modulus: self.modulus,
-            value: (self.value * other.inverse().value) % self.modulus 
-        }
-    }
-}
-
-// /=演算子
-impl std::ops::DivAssign for Modint {
-    fn div_assign(&mut self, other: Self) {
-        *self = Self {
-            modulus: self.modulus,
-            value: (self.value * other.inverse().value) % self.modulus
-        };
-    }
-}
-
-
-// isize型との演算
-// ModInt * 整数
-impl std::ops::Mul<isize> for Modint {
-    type Output = Modint;
-
-    fn mul(self, other: isize) -> Modint {
-        Modint {
-            modulus: self.modulus,
-            value: (self.value * (other % self.modulus)) % self.modulus,
-        }
-    }
-}
-
-// 整数 * ModInt
-impl std::ops::Mul<Modint> for isize {
-    type Output = Modint;
-
-    fn mul(self, other: Modint) -> Modint {
-        Modint {
-            modulus: other.modulus,
-            value: ((self % other.modulus) * other.value) % other.modulus,
-        }
-    }
-}
-
-// ModInt *= 整数
-impl std::ops::MulAssign<isize> for Modint {
-    fn mul_assign(&mut self, other: isize) {
-        *self = Self {
-            modulus: self.modulus,
-            value: (self.value * (other % self.modulus)) % self.modulus
-        }
-    }
-}
-
-
-// ModInt + 整数
-impl std::ops::Add<isize> for Modint {
-    type Output = Modint;
-
-    fn add(self, other: isize) -> Modint {
-        Modint {
-            modulus: self.modulus,
-            value: (self.value + other) % self.modulus,
-        }
-    }
-}
-
-// 整数 + ModInt
-impl std::ops::Add<Modint> for isize {
-    type Output = Modint;
-
-    fn add(self, other: Modint) -> Modint {
-        Modint {
-            modulus: other.modulus,
-            value: ((self % other.modulus) + other.value) % other.modulus,
-        }
-    }
-}
-
-// ModInt += 整数
-impl std::ops::AddAssign<isize> for Modint {
-    fn add_assign(&mut self, other: isize) {
-        *self = Self {
-            modulus: self.modulus,
-            value: (self.value + (other % self.modulus)) % self.modulus
-        }
-    }
-}
-
-
-
-
-
-
-
-// ModInt - 整数
-impl std::ops::Sub<isize> for Modint {
-    type Output = Modint;
-
-    fn sub(self, other: isize) -> Modint {
-        Modint {
-            modulus: self.modulus,
-            value: (self.modulus + self.value - other) % self.modulus,
-        }
-    }
-}
-
-// 整数 - ModInt
-impl std::ops::Sub<Modint> for isize {
-    type Output = Modint;
-
-    fn sub(self, other: Modint) -> Modint {
-        Modint {
-            modulus: other.modulus,
-            value: (other.modulus + (self % other.modulus) - other.value) % other.modulus,
-        }
-    }
-}
-
-// ModInt -= 整数
-impl std::ops::SubAssign<isize> for Modint {
-    fn sub_assign(&mut self, other: isize) {
-        *self = Self {
-            modulus: self.modulus,
-            value: (self.modulus + self.value - (other % self.modulus)) % self.modulus
-        }
-    }
-}
-
-
-
-
-
-
-// ModInt / 整数
-impl std::ops::Div<isize> for Modint {
-    type Output = Modint;
-
-    fn div(self, other: isize) -> Modint {
-        let other_modint = Modint::new(self.modulus, other);
-        return self / other_modint
-    }
-}
-
-// 整数 / ModInt
-impl std::ops::Div<Modint> for isize {
-    type Output = Modint;
-
-    fn div(self, other: Modint) -> Modint {
-        let self_modint = Modint::new(other.modulus, self);
-        return self_modint / other
-    }
-}
-
-// ModInt /= 整数
-impl std::ops::DivAssign<isize> for Modint {
-    fn div_assign(&mut self, other: isize) {
-        let other_modint = Modint::new(self.modulus, other);
-        *self = *self / other_modint;
-    }
-}
-
-
-
-
-
-// mod p を法とした時の割り算 a / b の値
-fn mod_dev(a: isize, b: isize, modulo: isize) -> isize {
-    return a * mod_inverse(b, modulo) % modulo
-}
-
-// mod p を法とした時の逆数(逆元という) 1 / b の値
-fn mod_inverse(a: isize, modulo: isize) -> isize {
-    // フェルマーの小定理
-    //     a^(p-1) = 1     (mod p)
-    // <=> a * a^(p-2) = 1 (mod p)
-    // <=> 1 / a = a^(p-2) (mod p)
-    // (ただし、法pは素数)
-
-    return mod_pow(a, modulo - 2, modulo)
-}
-
-// mod p を法とした時の累乗
-// base^(x) % mod を繰り返し二乗法により、O(log2(x))の計算量で求める　(O(x)だとTLE)
-// No.69参照
-fn mod_pow(mut base: isize, mut exponent: isize, modulo: isize) -> isize {
-    // 例: 3^4= (3^2)^2 = 9^2 = 81^1
-    // 初期
-    // 3^4
-    // remainder=1
-    // base=3
-    // exp=4
-
-    // i=0:
-    // remainder = 1
-    // base = 3 * 3 = 9
-    // exp = 4 / 2 = 2
-
-    // i=1:
-    // remainder = 1
-    // base = 9 * 9 = 81
-    // exp = 2 / 2 = 1
-
-    // i=2:
-    // remainder = remainder * base = 81
-    // base = 81 * 81
-    // exp = 1 / 2 = 0
-
-    let mut remainder = 1;
-    while exponent != 0 {
-        if exponent % 2 == 1 {
-            remainder = (remainder * base) % modulo;
-        }
-        base = (base * base) % modulo;
-        exponent /= 2;
-    }
-    return remainder
 }
