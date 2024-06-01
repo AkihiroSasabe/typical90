@@ -6,15 +6,16 @@ use std::collections::VecDeque;
 use std::collections::BinaryHeap;
 use proconio::marker::Chars;
 fn main() {
+    // https://atcoder.jp/contests/typical90/tasks/typical90_bw
     input! {
         mut n: usize,
     }
-    let prime_num_list: Vec<[usize; 2]> = prime_factorize(n);
+    let prime_num_list: Vec<(usize, usize)> = prime_factorize(n);
     // println!("{:?}", prime_num_list);
     
     let mut count = 0;
     for i in 0..prime_num_list.len() {
-        count += prime_num_list[i][1];
+        count += prime_num_list[i].1;
     }
 
     let answer = get_times_devisible_by2(count);
@@ -29,12 +30,12 @@ fn main() {
 
 
 // 素因数分解
-fn prime_factorize(mut x: usize) -> Vec<[usize; 2]> {
-    // prime_num_list[i] := [素数p_i, 指数exp_i] が、格納されたリスト
+fn prime_factorize(mut x: usize) -> Vec<(usize, usize)> {
+    // prime_num_list[i] := (素数p_i, 指数exp_i) が、格納されたリスト
     // 
     // 例: x = 48 = 2^4 * 3^1 のとき、
-    // let prime_num_list: Vec<[usize; 2]> = prime_factorize(48);
-    // prime_num_list = [[2, 4], [3, 1]]
+    // let prime_num_list: Vec<(usize, usize)> = prime_factorize(48);
+    // prime_num_list = [(2, 4), (3, 1)]
 
     // let root_x = (x as f64).sqrt() as usize;
     let mut prime_num_list = vec![];
@@ -48,11 +49,11 @@ fn prime_factorize(mut x: usize) -> Vec<[usize; 2]> {
             exponent += 1;
         }
         if exponent != 0 {
-            prime_num_list.push([i, exponent]);
+            prime_num_list.push((i, exponent));
         }
     }
     if x != 1 {
-        prime_num_list.push([x, 1]);
+        prime_num_list.push((x, 1));
     }
     return prime_num_list
 }
