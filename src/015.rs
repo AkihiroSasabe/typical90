@@ -98,8 +98,13 @@ pub mod combination {
         let mut inv_factorial = vec![1; max_n+1];
         for i in 1..(max_n+1) {
             factorial[i] = (i * factorial[i-1]) % modulus;
-            inv_factorial[i] = get_inverse(factorial[i], modulus);
         }
+        inv_factorial[max_n] = get_inverse(factorial[max_n], modulus);
+        for i in 1..max_n {
+            inv_factorial[max_n - i] = inv_factorial[max_n - i + 1] * ((max_n - i + 1) % modulus);
+            inv_factorial[max_n - i] %= modulus;
+        }
+
         return (factorial, inv_factorial)
     }
     
