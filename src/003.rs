@@ -11,99 +11,104 @@ fn main() {
     input! {
         n: usize
     }
-    let mut g = vec![vec![]; n];
+    let mut graph = vec![vec![]; n];
     for i in 0..(n-1) {
         input! {
-            a_i: usize,
-            b_i: usize,
+            ai: usize,
+            bi: usize,
         }
-        g[a_i - 1].push(b_i - 1);
-        g[b_i - 1].push(a_i - 1);
+        graph[ai - 1].push(bi - 1);
+        graph[bi - 1].push(ai - 1);
     }
-    let (max_dist_from_0, max_v_from_0) = get_max_dist(&g, 0, n);
-    // dbg!(max_dist_from_0, max_v_from_0);
-    let (max_dist, max_v) = get_max_dist(&g, max_v_from_0, n);
-    // dbg!(max_dist, max_v);
-    println!("{}", max_dist + 1);
 
+    // 木の直径を求める
+    use tree_diameter::{get_diamter_for_graph_without_weights, get_diamter_for_graph_with_weights};
+    let (diameter, vs, vt) = get_diamter_for_graph_without_weights(&graph);
+    // let (diameter, vs, vt) = get_diamter_for_graph_with_weights(&graph);
+
+    let ans = diameter + 1;
+    println!("{}", ans);
 }
 
-
-// 幅優先探索
-fn get_max_dist(g: &Vec<Vec<usize>>, start_v: usize, graph_size: usize) -> (usize, usize) {
-
-    let mut todo: VecDeque<usize> = VecDeque::new();
-    let mut dist = vec![0; graph_size];
-    let mut max_dist = 0;
-    let mut max_v = start_v;
-    todo.push_back(start_v);
-    while !todo.is_empty() {
-        let v = todo.pop_front().unwrap();
-        for next_v in g[v].iter() {
-            if dist[*next_v] != 0 || *next_v == start_v {continue}
-            todo.push_back(*next_v);
-            dist[*next_v] = dist[v] + 1;
-            if dist[*next_v] > max_dist {
-                max_dist = dist[*next_v];
-                max_v = *next_v;
+/// 木の直径を求めるモジュール (参考: https://algo-logic.info/tree-diameter/)
+/// 木の直径とは、木に存在する2つノード間の最大距離を木の直径
+/// 重み無しの木でも、重み付きの木でも、木の最遠頂点間の距離が直径
+/// 1.計算量
+/// O(|V|)
+/// 2.使い方
+/// use tree_diameter::{get_diamter_for_graph_without_weights, get_diamter_for_graph_with_weights};
+/// let (diameter, vs, vt) = get_diamter_for_graph_without_weights(&graph); // 重み無しの木
+/// let (diameter, vs, vt) = get_diamter_for_graph_with_weights(&graph); // 重み付きの木
+/// 3.アルゴリズム詳細
+/// 3.1.任意の頂点 v0 を選ぶ
+/// 3.2.v0からBFS or DFSで、最も遠くにある頂点 vs を探索する
+/// 3.3.vsからBFS or DFSで、最も遠くにある頂点 vt を探索する
+/// 3.4.vsとvtを結ぶパスが直径となる
+mod tree_diameter {
+    use std::collections::VecDeque;
+    /// 重み無しの木の直径を求める
+    pub fn get_diamter_for_graph_without_weights(graph_without_weights: &Vec<Vec<usize>>) -> (usize, usize, usize) {
+        let n = graph_without_weights.len();
+        let mut graph_with_weights: Vec<Vec<(usize, usize)>> = vec![vec![]; n];
+        for v in 0..n {
+            for &nv in graph_without_weights[v].iter() {
+                graph_with_weights[v].push((nv, 1));
             }
         }
+        let (diameter, vs, vt) = get_diamter_for_graph_with_weights(&graph_with_weights);
+        return (diameter, vs, vt)
     }
-    return (max_dist, max_v)
+
+    /// 重み有りの木の直径を求める
+    pub fn get_diamter_for_graph_with_weights(graph: &Vec<Vec<(usize, usize)>>) -> (usize, usize, usize) {
+        
+        // 任意の頂点 v0
+        let v0 = 0;
+        // 任意の頂点 v0 から各頂点への距離を取得
+        let distances_from_v0 = get_distances(graph, v0);
+        // 任意の頂点vsからの距離が最大の頂点 vs を取得 ( vs が木の直径の端点の片側)
+        let (max_dist, vs) = get_max_distance_and_its_vertex(&distances_from_v0);
+
+        // vs から各頂点への距離を取得
+        let distances_from_vs = get_distances(graph, vs);
+
+        // vs からの距離の最大が木の直径 diameter で、その頂点 vt が、木の直径の端点の反対側となる。
+        let (diameter, vt) = get_max_distance_and_its_vertex(&distances_from_vs);
+
+        return (diameter, vs, vt)
+    }
+
+    /// 幅優先探索で、頂点 start_v から、各頂点への距離を求める
+    fn get_distances(graph: &Vec<Vec<(usize, usize)>>, start_v: usize) -> Vec<usize> {
+        let n = graph.len();
+        let mut queue = VecDeque::new();
+        let init_distance = usize::MAX;
+        let mut distances = vec![init_distance; n];
+        distances[start_v] = 0;
+        queue.push_back(start_v);
+        while queue.len() != 0 {
+            let v = queue.pop_front().unwrap();
+            for &(nv, nw) in graph[v].iter() {
+                // 既に通ったことがあれば、スルー
+                if distances[nv] != init_distance {continue}
+                distances[nv] = distances[v] + nw;
+                queue.push_back(nv);
+            }
+        }
+        return distances
+    }
+
+    /// 最大距離と、その頂点を求める
+    fn get_max_distance_and_its_vertex(distances: &Vec<usize>) -> (usize, usize) {
+        let n = distances.len();
+        let mut max_dist = distances[0];
+        let mut max_v = 0;
+        for v in 1..n {
+            if max_dist < distances[v] {
+                max_v = v;
+                max_dist = distances[v];
+            }
+        }
+        return (max_dist, max_v)
+    }
 }
-
-
-
-
-
-
-
-// 駄目な解放
-// fn main() {
-//     input! {
-//         n: usize,
-//     }
-
-//     let mut g = vec![vec![]; n];
-//     for i in 0..(n-1) {
-//         input! {
-//             a_i: usize,
-//             b_i: usize,
-//         }
-//         g[a_i - 1].push(b_i - 1);
-//     }
-//     // println!("{:?}", g);
-//     let mut answer = 0;
-//     for v in 0..n {
-//         let mut seen = vec![false; n];
-//         let (max_depth, second_depth) = dfs(&mut g, v, &mut seen, 0);
-//         dbg!(max_depth, second_depth);
-//         answer = max(answer, max_depth + second_depth + 1);
-//     }
-//     println!("{}", answer);
-
-// }
-
-// // 深さ優先探索
-// fn dfs(g: & Vec<Vec<usize>>, v: usize, seen: &mut Vec<bool>, current_depth: usize) -> (usize, usize) {
-//     seen[v] = true;
-
-//     let mut depth_list = vec![current_depth];
-//     for next_v in g[v].iter() {
-//         if seen[*next_v] {continue}
-//         let (max_depth, _) = dfs(g, *next_v, seen, current_depth+1);
-//         depth_list.push(max_depth);
-//     }
-//     depth_list.sort();
-
-//     let max_depth = depth_list[depth_list.len() - 1];
-//     let second_max_depth;
-//     if depth_list.len() >= 2 {
-//         second_max_depth = depth_list[depth_list.len() - 2];
-//     }
-//     else {
-//         second_max_depth = 0;
-//     }
-
-//     return (max_depth, second_max_depth)
-// }
