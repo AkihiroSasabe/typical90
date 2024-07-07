@@ -23,8 +23,8 @@ fn main() {
 
     // 木の直径を求める
     use tree_diameter::{get_diamter_for_graph_without_weights, get_diamter_for_graph_with_weights};
-    let (diameter, vs, vt) = get_diamter_for_graph_without_weights(&graph);
-    // let (diameter, vs, vt) = get_diamter_for_graph_with_weights(&graph);
+    let (diameter, _vs, _vt) = get_diamter_for_graph_without_weights(&graph);
+    // let (diameter, _vs, _vt) = get_diamter_for_graph_with_weights(&graph);
 
     let ans = diameter + 1;
     println!("{}", ans);
@@ -37,13 +37,17 @@ fn main() {
 /// O(|V|)
 /// 2.使い方
 /// use tree_diameter::{get_diamter_for_graph_without_weights, get_diamter_for_graph_with_weights};
-/// let (diameter, vs, vt) = get_diamter_for_graph_without_weights(&graph); // 重み無しの木
-/// let (diameter, vs, vt) = get_diamter_for_graph_with_weights(&graph); // 重み付きの木
-/// 3.アルゴリズム詳細
+/// let (diameter, _vs, _vt) = get_diamter_for_graph_without_weights(&graph); // 重み無しの木
+/// let (diameter, _vs, _vt) = get_diamter_for_graph_with_weights(&graph); // 重み付きの木
+/// 3.アルゴリズムの詳細
 /// 3.1.任意の頂点 v0 を選ぶ
 /// 3.2.v0からBFS or DFSで、最も遠くにある頂点 vs を探索する
 /// 3.3.vsからBFS or DFSで、最も遠くにある頂点 vt を探索する
 /// 3.4.vsとvtを結ぶパスが直径となる
+/// 4.アルゴリズムの正当性
+/// 「どの頂点から始めても、最も遠くにある頂点 x は直径の端点になる」が重要な事実。
+/// これが成立すれば、適当な頂点 s に対して最も遠くにある点 u は直径の一方の端点になり、u に対して最も遠くにある点 v はもう一方の端点になる。
+/// これの証明は背理法で行う。
 mod tree_diameter {
     use std::collections::VecDeque;
     /// 重み無しの木の直径を求める
