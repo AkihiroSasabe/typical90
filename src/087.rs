@@ -65,7 +65,10 @@ fn floyd_warshall<T>(graph: &Vec<Vec<(usize, T)>>) -> Vec<Vec<T>>
     let zero: T     = T::zero();
     let one: T      = T::one();
     let two: T      = one + one;
-    let inf: T      = T::max_value() / two;
+    let ten: T      = two + two + two + two + two;
+    let inf: T      = T::max_value() / ten;
+    // let INF: usize = usize::MAX / 10;
+
 
     // dp[i][j]で頂点iから頂点jに行くときの最短距離
     let mut dp: Vec<Vec<T>> = vec![vec![inf; n]; n];
