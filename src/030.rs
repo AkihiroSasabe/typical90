@@ -47,17 +47,21 @@ fn main() {
 // エラトステネスの篩(ふるい)
 // n以下の素数を全て列挙する為のアルゴリズムO(n*log(log(n)))
 fn sieve_of_eratosthenes(n: usize) -> Vec<usize> {
-    // prime_judge[i] := iが素数なら1, そうでなければ0
-    let mut prime_judge = vec![1; n + 1];
-    prime_judge[0] = 0;
-    prime_judge[1] = 0;
+    // is_prime_list[i] := iが素数なら true , そうでなければ false
+    let mut is_prime_list = vec![true; n + 1]; // この初期化でO(N)かかる!
+    is_prime_list[0] = false; // 0は素数ではない
+    is_prime_list[1] = false; // 1は素数ではない
 
     // prime_list := n以下の素数を格納したリスト
     let mut prime_list = vec![];
+    
+    // ここの計算で、O(N/2 + N/3 + N/5 + N/7 + N/11 + ...)  = O(N (1/2 + 1/3 + 1/5 + 1/7 + 1/11 + ... )) = O(Nlog(logN))かかる。
+    // ※素数の逆数和は、log(logN)と漸近していくため。自然数の逆数和は、logNに漸近する。
     for i in 2..(n+1) {
-        if prime_judge[i] == 0 {continue}
+        if !is_prime_list[i] {continue}
         for j in 2..((n/i)+1) {
-            prime_judge[j * i] = 0;
+            // i の倍数が素数ではないことを記録
+            is_prime_list[j * i] = false;
         }
         prime_list.push(i);
     }
