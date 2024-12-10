@@ -1,4 +1,4 @@
-use proconio::input;
+use proconio::{input, marker::{Usize1, Isize1}};
 use itertools::Itertools;
 use std::cmp::{max, min};
 use std::cmp::Ordering;
@@ -11,17 +11,21 @@ fn main() {
         m: usize,
     }
 
-    use dijkstra_algorithm::{Edge, get_minimum_distance};
+    use dijkstra_algorithm::{Edge, get_minimum_distance, convert_graph};
     let mut graph = vec![vec![]; n];
     for i in 0..m {
         input! {
-            a_i: usize,
-            b_i: usize,
-            c_i: usize,
+            ai: Usize1,
+            bi: Usize1,
+            ci: usize,
         }
-        graph[a_i - 1].push(Edge {neighbor: b_i - 1, weight: c_i});
-        graph[b_i - 1].push(Edge {neighbor: a_i - 1, weight: c_i});
+        // graph[ai].push(Edge {neighbor: bi, weight: ci});
+        // graph[bi].push(Edge {neighbor: ai, weight: ci});
+        graph[ai].push((bi, ci));
+        graph[bi].push((ai, ci));
     }
+    let graph = convert_graph(&graph);
+
     let distance_list_from_1 = get_minimum_distance(&graph, 0);
     let distance_list_from_N = get_minimum_distance(&graph, n-1);
     for i in 0..n {
@@ -86,14 +90,17 @@ mod dijkstra_algorithm {
         return distance
     }
 
-    pub fn convert_graph(graph: &Vec<Vec<Vec<usize>>>) -> Vec<Vec<Edge>> {
+    pub fn convert_graph<T>(graph: &Vec<Vec<(usize, T)>>) -> Vec<Vec<Edge>> 
+        where
+        T: Copy + Into<usize>, // TがInto<usize>を実装していることを要求
+    {
         let mut new_graph = vec![vec![]; graph.len()];
 
-        for v0 in 0..graph.len() {
-            for edge in graph[v0].iter() {
-                let v1 = edge[0];
-                let weight = edge[1];
-                new_graph[v0].push(Edge::new(v1, weight));
+        for v in 0..graph.len() {
+            for i in 0..graph[v].len() {
+                let nv = graph[v][i].0;
+                let weight = graph[v][i].1.into(); // `Into`トレイトのメソッドを使用;
+                new_graph[v].push(Edge::new(nv, weight));
             }
         }
         return new_graph
