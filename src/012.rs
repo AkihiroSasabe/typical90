@@ -98,6 +98,7 @@ fn get_flat_index(h_i: usize, w_i: usize, w: usize) -> usize {
 
 // Union-Find
 // グループの管理（グループ同士の結合や、要素同士の所属か同じか判定）するのに便利なデータ構造
+#[derive(Clone)]
 struct UnionFindTree {
     parents: Vec<usize>,    // 各頂点の属するグループ(根付き木)の親頂点の番号
     sizes: Vec<usize>       // 各頂点の属するグループ(根付き木)のサイズ(頂点数)
