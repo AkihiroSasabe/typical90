@@ -83,31 +83,31 @@ fn main() {
     let t_b: Vec<char> = t_b.iter().map(|&c| c.to_ascii_lowercase()).collect();
     
     // ローリングハッシュの取得
-    let rh_s = RollingHash::new(&s, num_unique_char);
-    let rh_tr = RollingHash::new(&t_r, num_unique_char); // 赤
-    let rh_tg = RollingHash::new(&t_g, num_unique_char); // 緑
-    let rh_tb = RollingHash::new(&t_b, num_unique_char); // 青
+    let hasher = RollingHash::new(&s, num_unique_char);
+    let hasher_tr = RollingHash::new(&t_r, num_unique_char); // 赤
+    let hasher_tg = RollingHash::new(&t_g, num_unique_char); // 緑
+    let hasher_tb = RollingHash::new(&t_b, num_unique_char); // 青
 
     let mut ans = 0;
     // kが正のとき
     for k in 0..n {
         // Sの0, n-1-kまでのハッシュ値
-        let s_hash = rh_s.get_substring_hash(0, n-1-k);
+        let hash = hasher.get_substring_hash(0, n-1-k);
         // Tのk, n-1までのハッシュ値
-        let tr_hash = rh_tr.get_substring_hash(k, n-1); // 赤
-        let tg_hash = rh_tg.get_substring_hash(k, n-1); // 緑
-        let tb_hash = rh_tb.get_substring_hash(k, n-1); // 青
+        let tr_hash = hasher_tr.get_substring_hash(k, n-1); // 赤
+        let tg_hash = hasher_tg.get_substring_hash(k, n-1); // 緑
+        let tb_hash = hasher_tb.get_substring_hash(k, n-1); // 青
 
         // 赤で一致するか?
-        if s_hash == tr_hash {
+        if hash == tr_hash {
             ans += 1;
         }
         // 緑で一致するか?
-        if s_hash == tg_hash {
+        if hash == tg_hash {
             ans += 1;
         }
         // 青で一致するか?
-        if s_hash == tb_hash {
+        if hash == tb_hash {
             ans += 1;
         }
     }
@@ -115,23 +115,23 @@ fn main() {
     // kが負のとき
     for k in 1..n {
         // Sのk, n-1までのハッシュ値
-        let s_hash = rh_s.get_substring_hash(k, n-1);
-        // let s_hash = get_substring_hash(&first_hash_list_s, k, n-1, &power_of_base, modulus);
+        let hash = hasher.get_substring_hash(k, n-1);
+        // let hash = get_substring_hash(&first_hash_list_s, k, n-1, &power_of_base, modulus);
         // Tの0, n-1-kまでのハッシュ値
-        let tr_hash = rh_tr.get_substring_hash(0, n-1-k); // 赤
-        let tg_hash = rh_tg.get_substring_hash(0, n-1-k); // 緑
-        let tb_hash = rh_tb.get_substring_hash(0, n-1-k); // 青
+        let tr_hash = hasher_tr.get_substring_hash(0, n-1-k); // 赤
+        let tg_hash = hasher_tg.get_substring_hash(0, n-1-k); // 緑
+        let tb_hash = hasher_tb.get_substring_hash(0, n-1-k); // 青
 
         // 赤で一致するか?
-        if s_hash == tr_hash {
+        if hash == tr_hash {
             ans += 1;
         }
         // 緑で一致するか?
-        if s_hash == tg_hash {
+        if hash == tg_hash {
             ans += 1;
         }
         // 青で一致するか?
-        if s_hash == tb_hash {
+        if hash == tb_hash {
             ans += 1;
         }
     }
