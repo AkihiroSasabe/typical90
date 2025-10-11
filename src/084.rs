@@ -10,6 +10,34 @@ fn main() {
         n: usize,
         s: Chars
     }
+    // solve_1st_time(n, s); // 2022-06-24
+    solve_2nd_time(n, s); // 2025-10-11
+}
+
+fn solve_2nd_time(n: usize, s: Vec<char>) {
+    // 2025-10-11 Run Length Encoding の関数のテストを兼ねて実装
+
+    // 解法
+    // o と x が両方含まれる
+    // 全事象 - 余事象 = 全事象 - (o だけの事象) - (x だけの事象)
+
+    // 全事象 := n + n-1 + ... + 1 = n*(n+1)/2
+    let whole_event = n * (n + 1) / 2;
+
+    let rle = run_length_encoding(&s);
+
+    // 余事象を数える
+    let mut complementary_event = 0;
+    for (ch, len) in rle {
+        complementary_event += len * (len + 1) / 2;
+    }
+    let ans = whole_event - complementary_event;
+    println!("{}", ans);
+
+}
+
+fn solve_1st_time(n: usize, s: Vec<char>) {
+    // 2022-06-24 22:27:57 初提出
 
     // ooxo
     // Success
@@ -49,3 +77,18 @@ fn main() {
 
 }
 
+fn run_length_encoding<T: PartialEq + Clone>(s: &Vec<T>) -> Vec<(T, usize)> {
+    // 配列sを、ランレングス圧縮する関数.
+    // rle := (要素, 連続長さ) の配列を返す
+
+    let mut rle: Vec<(T, usize)> = vec![];
+    let mut count: usize = 0;
+    for i in 0..s.len() {
+        count += 1;
+        if i + 1 == s.len() || s[i] != s[i + 1] {
+            rle.push((s[i].clone(), count));
+            count = 0;
+        }
+    }
+    return rle
+}
