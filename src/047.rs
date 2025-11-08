@@ -145,6 +145,15 @@ fn main() {
 // 初期化: O(N) (文字列の長さをNとする。)
 // クエリ: O(1): 部分文字列S[l,r]のハッシュ値の取得
 // 実装参考：鉄則本と、けんちょんのブログ https://drken1215.hatenablog.com/entry/2019/09/16/014600
+// 使用例
+// let num_unique_char = 26; // num_unique_char の値は文字の種類数以上なら何でも良い。100とか26とか。(ここの数値はbaseになる。たぶんmodulus よりは小さい方が良さそう。)
+// let hasher = RollingHash::new(&s, num_unique_char);
+// let hash = hasher.get_substring_hash(left, right);
+// 備考1：自分のローリングハッシュは、英小文字しか受け入れていないが、'a'で検索して、ここを'A'などに置換すれば大文字でも対応可能
+// 備考2: ハッシュの衝突回避 (自分はmodを2つにしている。以下、未検証。)
+// noshi91「Rolling Hash は mod ではなく base の方をランダムにするだけで落ちなくなります。精度上げたい時も mod ではなく base を複数組み合わせるだけで良いです。あと 2^61-1 を使ってください」
+// https://x.com/noshi91/status/1984620621591199892
+// https://qiita.com/keymoon/items/11fac5627672a6d6a9f6
 struct RollingHash {
     modulus_0: usize,
     modulus_1: usize,
