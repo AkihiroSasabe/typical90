@@ -136,7 +136,7 @@ impl LowestCommonAncestor {
         LowestCommonAncestor {parent, distance}
     }
 
-    // DFSで全ての頂点vについて、根からの距離と親(1つ上の頂点)を求める
+    /// DFSで全ての頂点vについて、根からの距離と親(1つ上の頂点)を求める
     fn get_dist_from_root_by_dfs(
         graph: &Vec<Vec<usize>>, // graph[v][i] := 頂点vとi番目に繋がっている頂点
         v: usize, // 頂点v
@@ -157,7 +157,7 @@ impl LowestCommonAncestor {
         }
     }
 
-    // 頂点uと頂点vのLCA(最近共通祖先)を求める
+    /// 頂点uと頂点vのLCA(最近共通祖先)を求める
     pub fn query(&self, mut u: usize, mut v: usize) -> usize {
         // uの方が深いようにする
         if self.distance[u] < self.distance[v] {
@@ -217,7 +217,7 @@ impl LowestCommonAncestor {
         // return ok + 1
     }
 
-    // 頂点uと頂点vの距離を求める
+    /// 頂点uと頂点vの距離を求める
     pub fn get_distance(&self, u: usize, v: usize) -> usize {
         let lca = self.query(u, v);
         let dist_from_u_to_lca = self.distance[u] - self.distance[lca];
@@ -225,7 +225,7 @@ impl LowestCommonAncestor {
         return dist_from_u_to_lca + dist_from_v_to_lca
     }
 
-    // 頂点xが頂点uと頂点vを結ぶパス上に存在するか?
+    /// 頂点xが頂点uと頂点vを結ぶパス上に存在するか?
     pub fn is_on_path(&self, x: usize, u:usize, v: usize) -> bool {
 
         return self.get_distance(u, x) + self.get_distance(x, v) == self.get_distance(u, v)
